@@ -1,0 +1,24 @@
+{
+  "name": "stringtemplate",
+  "version": "0.0.0",
+  "description": "adds template() method to String.prototype and Function.prototype",
+  "main": "stringtemplate.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dfkaye/stringtemplate.git"
+  },
+  "keywords": [
+    "string",
+    "template",
+    "heredoc"
+  ],
+  "author": "David Kaye <dfkaye@yahoo.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dfkaye/stringtemplate/issues"
+  },
+  "homepage": "https://github.com/dfkaye/stringtemplate"
+}
