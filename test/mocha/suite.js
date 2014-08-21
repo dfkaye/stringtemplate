@@ -1,6 +1,5 @@
 // mocha/suite.js
 
-
 if (typeof require == 'function') {
   require('../../../stringtemplate');
 
