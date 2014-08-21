@@ -3,8 +3,9 @@
   "version": "0.0.0",
   "description": "adds template() method to String.prototype and Function.prototype",
   "main": "stringtemplate.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "scripts" : {
+    "test": "node test/mocha/node-suite.js",
+    "testem": "testem -l mocha -t ./test/mocha/browser-suite.html"
   },
   "repository": {
     "type": "git",
