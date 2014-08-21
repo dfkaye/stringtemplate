@@ -15,4 +15,5 @@ adds template() method to String.prototype and Function.prototype
 
 ## rawgithub
 
-+ [mocha suite](https://rawgithub.com/dfkaye/stringtemplate/master/test/mocha/browser-suite.html)
+<a href='https://rawgit.com/dfkaye/stringtemplate/master/test/mocha/browser-suite.html' 
+   target='_blank'>run browser-suite</a> on rawgithub (opens new tab|window)
