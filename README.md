@@ -5,13 +5,15 @@ adds template() method to String.prototype and Function.prototype
 
 # tests
 
+[![Build Status](https://travis-ci.org/dfkaye/stringtemplate.png?branch=master)](https://travis-ci.org/dfkaye/stringtemplate)
+
 ## node
 
-  npm test
+npm test
   
 ## testem
 
-  npm run testem
+npm run testem
 
 ## rawgithub
 
