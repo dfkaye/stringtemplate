@@ -66,7 +66,7 @@ typeof String.prototype.template == 'function' ||
 
     // @array@ || @data.array@:
     if (arrayStart) {
-      arrayEnd = false;
+
       array = data;
       pathname = arrayStart[0].replace(/\@/g, ''); // console.log('pathname: ' + pathname);
       
@@ -151,7 +151,8 @@ typeof String.prototype.template == 'function' ||
 });
 
 // function#template
-// heredoc/multiline string polyfill
+// heredoc/multiline string polyfill 
+// originally inspired by @rjrodger's mstring project
 // requires string#trim and string#template
 typeof Function.prototype.template == 'function' ||
 (Function.prototype.template = function template(data) {
@@ -162,7 +163,7 @@ typeof Function.prototype.template == 'function' ||
   var fnBody = fs.replace(/\s*function[^\(]*[\(][^\)]*[\)][^\{]*{/,'')
                  .replace(/[\}]$/, '');
   var table = fnBody.match(/\/(\*){3,3}[^\*]+(\*){3,3}\//);
-  var rows = (table && table[0] || fs)
+  var rows = (table && table[0] || fnBody)
               .replace(/\/\/[^\r]*/g, '') // remove line comments...
               .replace(/(\/\*+)*[\r]*(\*+\/)*/g, '') // ...block comments
               .split('\n'); // and split by newline
@@ -174,7 +175,7 @@ typeof Function.prototype.template == 'function' ||
       r.push( rows[i].trim() );
     }
   }
-    
+
   r = r.join('\n').trim();
   
   return (data && typeof data == 'object') ? r.template(data) : r;
