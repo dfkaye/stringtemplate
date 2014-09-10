@@ -31,7 +31,7 @@ methods to native/built-in types:
 
 + `String.prototype.template(data)`
 
-[ todo - detail, examples ]
+[ todo - detail, examples, messages instead of errors ]
 
 + `Function.prototype.template(data)`
 
@@ -45,7 +45,9 @@ methods to native/built-in types:
 
 [JSON License (Modified MIT)](./JSON.license)
 
-# tests
+# Tests
+
+Tests are currently run with `mocha` using the 'qunit' ui and 'spec' reporter.
 
 ## node
 
@@ -55,9 +57,10 @@ methods to native/built-in types:
 
 `npm run testem`
 
+Browser tests run fine with `testem`, but mocha (node) and testem do not play as 
+well together on a Windows laptop (like mine).  YMMV.
+
 ## rawgithub
 
 <a href='https://rawgit.com/dfkaye/stringtemplate/master/test/mocha/browser-suite.html' 
    target='_blank'>run browser-suite</a> on rawgithub (opens new tab|window)
-   
- 

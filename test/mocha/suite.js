@@ -77,7 +77,15 @@ test('replaces $nested.placeholder$ data', function () {
 });
 
 
-suite('@array@, $arrayItem$, @.@, and @/@');
+suite('@array@, @.@, $arrayItem$, $.$, and @/@');
+
+test('returns index values in multiple rows when data argument is array using @.@ $.$ @/@', function () {
+  var s = ['@.@', '<li>$.$</li>', '@/@'].join('\n');
+  
+  assert(s.template([
+    33, false
+  ]).toString() === ['<li>33</li>', '<li>false</li>'].join('\n'));
+});
 
 test('returns item values in multiple rows when data argument is array using @.@ $name$ @/@', function () {
   var s = ['@.@', '<li>$name$</li>', '@/@'].join('\n');
@@ -88,14 +96,6 @@ test('returns item values in multiple rows when data argument is array using @.@
   ]).toString() === ['<li>charlize</li>', '<li>zora neale</li>'].join('\n'));
 });
 
-test('returns index values in multiple rows when data argument is array using @.@ $.$ @/@', function () {
-  var s = ['@.@', '<li>$.$</li>', '@/@'].join('\n');
-  
-  assert(s.template([
-    33, false
-  ]).toString() === ['<li>33</li>', '<li>false</li>'].join('\n'));
-});
-
 test('replaces nested array index values using @array@ $.$ @/@', function () {
   var s = ['@array@', '<li>$.$</li>', '@/@'].join('\n');
   
@@ -104,7 +104,7 @@ test('replaces nested array index values using @array@ $.$ @/@', function () {
   }).toString() === ['<li>three</li>', '<li>four</li>', '<li>five</li>'].join('\n'));
 });
 
-test('replaces nested array item keynames using @array@ $item$ @/@', function () {
+test('replaces nested array item values using @array@ $item$ @/@', function () {
   var s = ['@array@', '<li>$item$</li>', '@/@'].join('\n');
   
   assert(s.template({ 
