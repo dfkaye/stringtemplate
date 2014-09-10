@@ -179,11 +179,3 @@ typeof Function.prototype.template == 'function' ||
   
   return (data && typeof data == 'object') ? r.template(data) : r;
 });
-
-
-
-
-
-
-
-

@@ -1,7 +1,9 @@
 stringtemplate
 ==============
 
-adds template() method to String.prototype and Function.prototype
+A batch string#replace, using `$token$` placeholders for values/objects and 
+`@arrayName@` + `@/@` tokens for indexed data (arrays). `stringtemplate` adds a 
+`template()` method to `String.prototype` and `Function.prototype`.
 
 [![Build Status](https://travis-ci.org/dfkaye/stringtemplate.png?branch=master)](https://travis-ci.org/dfkaye/stringtemplate)
 
@@ -32,6 +34,10 @@ methods to native/built-in types:
 [ todo - detail, examples ]
 
 + `Function.prototype.template(data)`
+
+[ todo - detail, examples ]
+
+# Examples
 
 [ todo - detail, examples ]
 
