@@ -20,7 +20,7 @@
     "heredoc"
   ],
   "author": "David Kaye <dfkaye@yahoo.com>",
-  "license": "MIT",
+  "license": "JSON License (Modified MIT)",
   "bugs": {
     "url": "https://github.com/dfkaye/stringtemplate/issues"
   },
