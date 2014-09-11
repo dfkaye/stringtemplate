@@ -1,7 +1,7 @@
 {
   "name": "stringtemplate",
   "version": "0.0.0",
-  "description": "adds template() method to String.prototype and Function.prototype",
+  "description": "[in slow progress] adds template() method to String.prototype and Function.prototype",
   "main": "stringtemplate.js",
   "devDependencies": {
     "mocha": ">= 1.7"
@@ -15,9 +15,12 @@
     "url": "https://github.com/dfkaye/stringtemplate.git"
   },
   "keywords": [
+    "stringtemplate",
     "string",
     "template",
-    "heredoc"
+    "heredoc",
+    "docstring",
+    "logicless"
   ],
   "author": "David Kaye <dfkaye@yahoo.com>",
   "license": "JSON License (Modified MIT)",

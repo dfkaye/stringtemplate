@@ -140,31 +140,7 @@ test('groups multi-row data by array index', function () {
   ].join('\n'));
 });
 
-test('template results can be combined via data argument', function () {
 
-  // list
-  var list = ['<ul>', '$addresses$', '</ul>'].join('\n');
-  var address = ['@.@', '<li>$street$</li>', '<li>$city$, $state$</li>', '@/@'].join('\n');
-
-  var t = list.template({
-    addresses: address.template([
-      { street: '123 fourth street', city: 'cityburgh', state: 'aa' },
-      { street: '567 eighth street', city: 'burgville', state: 'bb' },
-      { street: '910 twelfth street', city: 'villetown', state: 'cc' }
-    ])
-  });
-
-  assert(t === [
-    '<ul>',
-    '<li>123 fourth street</li>',
-    '<li>cityburgh, aa</li>',
-    '<li>567 eighth street</li>',
-    '<li>burgville, bb</li>',
-    '<li>910 twelfth street</li>',
-    '<li>villetown, cc</li>',
-    '</ul>'
-  ].join('\n'));
-});
 
 test('@array@ returns empty string when template does not contain newline \\n chars', function () {
   var s = ['@array@', '<li>$item$</li>', '@/@'].join();
@@ -237,6 +213,18 @@ test('removes blank lines from  /*** docstring ***/', function () {
   assert(temp.template() === ['first', 'second', 'third'].join('\n') );
 });
 
+test('removes line comments found within /*** docstring ***/', function () {
+  function temp() {
+  /***
+  Hello.  // I am a comment
+    I am a docstring,
+    inside a function.  
+  ***/
+  }
+  // 
+  assert(-1 === temp.template().indexOf('I am a comment'));
+});
+
 test('calls string#template on docstring when data argument is specified', function () {
   function temp() {
   /***
@@ -249,14 +237,18 @@ test('calls string#template on docstring when data argument is specified', funct
   assert(temp.template(data) === '<p>data test</p>');
 });
 
-test('processes complex data', function () {
+
+suite('complex examples');
+
+test('processes complex data map', function () {
+
   function temp() {
    /***
    
-    <p>$title$</p>
-    <p>$object.main.property$, name: $object.main.name$</p>
+    <p>$title$</p> // string
+    <p>$object.main.property$, name: $object.main.name$</p> // nested object
     <ul>
-      @items@ // list value of name, age and address at each index
+      @items@ // array, lists value of name, age and address at each index
       <li>$name$, $age$</li>
       <li>$address$</li>
       @/@
@@ -267,7 +259,7 @@ test('processes complex data', function () {
       more
     </p>
     <ul>
-      @list@ // list value at each index
+      @list@ // array, lists value at each index
       <li>$.$</li>
 
       @/@
@@ -319,6 +311,31 @@ test('processes complex data', function () {
   assert(temp.template(data) === expected);
 });
 
+test('results can be combined via data argument', function () {
+
+  // list
+  var list = ['<ul>', '$addresses$', '</ul>'].join('\n');
+  var address = ['@.@', '<li>$street$</li>', '<li>$city$, $state$</li>', '@/@'].join('\n');
+
+  var t = list.template({
+    addresses: address.template([
+      { street: '123 fourth street', city: 'cityburgh', state: 'aa' },
+      { street: '567 eighth street', city: 'burgville', state: 'bb' },
+      { street: '910 twelfth street', city: 'villetown', state: 'cc' }
+    ])
+  });
+
+  assert(t === [
+    '<ul>',
+    '<li>123 fourth street</li>',
+    '<li>cityburgh, aa</li>',
+    '<li>567 eighth street</li>',
+    '<li>burgville, bb</li>',
+    '<li>910 twelfth street</li>',
+    '<li>villetown, cc</li>',
+    '</ul>'
+  ].join('\n'));
+});
 
 /*
 
