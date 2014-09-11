@@ -164,7 +164,7 @@ typeof Function.prototype.template == 'function' ||
                  .replace(/[\}]$/, '');
   var table = fnBody.match(/\/(\*){3,3}[^\*]+(\*){3,3}\//);
   var rows = (table && table[0] || fnBody)
-              .replace(/(\b|\s)*\/\/[^\r]*/g, '') // remove line comments...
+              .replace(/(\b|\s*)\/\/[^\r]*/g, '') // remove line comments...
               .replace(/(\/\*+)*[\r]*(\*+\/)*/g, '') // ...block comments
               .split('\n'); // and split by newline
               

@@ -336,9 +336,7 @@ test('results can be combined via data argument', function () {
     '</ul>'
   ].join('\n');
   
-  console.log(t);
-  console.log(expected)
-  assert(t === expected);
+  assert(t.toString() === expected);
 });
 
 /*
