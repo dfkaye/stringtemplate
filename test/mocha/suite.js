@@ -325,7 +325,7 @@ test('results can be combined via data argument', function () {
     ])
   });
 
-  assert(t === [
+  var expected = [
     '<ul>',
     '<li>123 fourth street</li>',
     '<li>cityburgh, aa</li>',
@@ -334,7 +334,11 @@ test('results can be combined via data argument', function () {
     '<li>910 twelfth street</li>',
     '<li>villetown, cc</li>',
     '</ul>'
-  ].join('\n'));
+  ].join('\n');
+  
+  console.log(t);
+  console.log(expected)
+  assert(t === expected);
 });
 
 /*
