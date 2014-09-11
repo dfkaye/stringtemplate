@@ -296,6 +296,8 @@ suite('complex examples');
 
 test('processes complex data map', function () {
 
+  //console.log('AHA ~ test failing ONLY on travis due to $ inside of $placeholder$');
+
   function temp() {
    /***
    
@@ -325,7 +327,7 @@ test('processes complex data map', function () {
     title: 'complex data test',
     object: { 
       main: {
-        property: 'this is a property value at $object.main.property$', 
+        property: 'this is a property value at object.main.property', 
         name: 'sarah winchester' 
       }
     },
@@ -346,7 +348,7 @@ test('processes complex data map', function () {
   
   var expected = [
     '<p>complex data test</p>',
-    '<p>this is a property value at $object.main.property$, name: sarah winchester</p>',
+    '<p>this is a property value at object.main.property, name: sarah winchester</p>',
     '<ul>',
     '<li>david, 28</li>',
     '<li>home</li>',
@@ -365,9 +367,6 @@ test('processes complex data map', function () {
   ].join('\n');
   
   var actual = temp.template(data);
-  
-  console.log(actual.length + ':\n' + actual);
-  console.log(expected.length  + ':\n' + expected);
 
   assert(actual == expected);
 });

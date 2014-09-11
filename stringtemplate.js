@@ -136,7 +136,7 @@ typeof String.prototype.template == 'function' ||
             p += 1;
           }
 
-          row = row.replace(placeholder[t], item);
+          row = row.replace(placeholder[t], item); //.replace(/\$/g, '\$')
         }
       }
       
