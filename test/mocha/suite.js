@@ -294,7 +294,7 @@ test('returns docstring without processing when data argument is not an' +
 
 suite('complex examples');
 
-test('processes complex data map', function () {
+test.only('processes complex data map', function () {
 
   //console.log('AHA ~ test failing ONLY on travis due to $ inside of $placeholder$');
 
@@ -367,6 +367,9 @@ test('processes complex data map', function () {
   ].join('\n');
   
   var actual = temp.template(data);
+  
+  console.log(actual.length + ':\n' + actual);
+  console.log(expected.length  + ':\n' + expected);
 
   assert(actual == expected);
 });
