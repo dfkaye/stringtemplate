@@ -308,7 +308,7 @@ test('processes complex data map', function () {
     '<li>c</li>',
     '</ul>'].join('\n');
   
-  assert(temp.template(data) === expected);
+  assert(temp.template(data) == expected);
 });
 
 test('results can be combined via data argument', function () {
