@@ -68,7 +68,7 @@ typeof String.prototype.template == 'function' ||
     if (arrayStart) {
 
       array = data;
-      pathname = arrayStart[0].replace(/\@/g, ''); // console.log('pathname: ' + pathname);
+      pathname = arrayStart[0].replace(/\@/g, '');
       
       if (pathname != '.') {
       
@@ -95,8 +95,7 @@ typeof String.prototype.template == 'function' ||
         }
         
         block.push(rows[i].trim());
-        
-      } // console.log(block);
+      }
       
       // process copies of each row in block
       for (j = 0; j < array.length; j += 1) {
@@ -119,7 +118,7 @@ typeof String.prototype.template == 'function' ||
       
     } else {
     
-      // $name$ || $data.name$:
+      // $placeholder$ || $namespace.placeholder$:
       if (placeholder) {
       
         // iterate placeholder in current row // console.log('placeholder: ' + placeholder)
@@ -136,7 +135,7 @@ typeof String.prototype.template == 'function' ||
             p += 1;
           }
 
-          row = row.replace(placeholder[t], item); //.replace(/\$/g, '\$')
+          row = row.replace(placeholder[t], item);
         }
       }
       
@@ -164,7 +163,7 @@ typeof Function.prototype.template == 'function' ||
                  .replace(/[\}]$/, '');
   var table = fnBody.match(/\/(\*){3,3}[^\*]+(\*){3,3}\//);
   var rows = (table && table[0] || fnBody)
-              .replace(/\/\/[^\r]*/g, '') // remove line comments...
+              .replace(/\/\/[^\n]*/g, '') // remove line comments...
               .replace(/(\/\*+)*[\r]*(\*+\/)*/g, '') // ...block comments
               .split('\n'); // and split by newline
               

@@ -296,7 +296,7 @@ suite('complex examples');
 
 test.only('processes complex data map', function () {
 
-  //console.log('AHA ~ test failing ONLY on travis due to $ inside of $placeholder$');
+  //console.log('AHA ~ test failing ONLY on travis due line comment regex fail on first line');
 
   function temp() {
    /***
@@ -327,7 +327,7 @@ test.only('processes complex data map', function () {
     title: 'complex data test',
     object: { 
       main: {
-        property: 'this is a property value at object.main.property', 
+        property: 'this is a property value at $object.main.property$', 
         name: 'sarah winchester' 
       }
     },
@@ -348,7 +348,7 @@ test.only('processes complex data map', function () {
   
   var expected = [
     '<p>complex data test</p>',
-    '<p>this is a property value at object.main.property, name: sarah winchester</p>',
+    '<p>this is a property value at $object.main.property$, name: sarah winchester</p>',
     '<ul>',
     '<li>david, 28</li>',
     '<li>home</li>',
