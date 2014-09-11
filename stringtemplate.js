@@ -44,7 +44,7 @@ typeof String.prototype.template == 'function' ||
 (String.prototype.template = function template(data) {
 
   if (!this.match(/\$[^\$]+\$/g) || !data || typeof data != 'object') {
-    return this;
+    return this.toString();
   }
 
   var rows = this.split('\n'),

@@ -19,25 +19,25 @@ test('returns same when argument is not an object', function () {
 
   var s = '';
   
-  assert(s.template().toString() === s.toString());
-  assert(s.template(1).toString() === s.toString());
-  assert(s.template(true).toString() === s.toString());
+  assert(s.template() === s.toString());
+  assert(s.template(1) === s.toString());
+  assert(s.template(true) === s.toString());
 });
 
 test('returns same when argument is an empty object or array', function () {
 
   var s = '';
   
-  assert(s.template(null).toString() === s.toString());
-  assert(s.template({}).toString() === s.toString());
-  assert(s.template([]).toString() === s.toString());  
+  assert(s.template(null) === s.toString());
+  assert(s.template({}) === s.toString());
+  assert(s.template([]) === s.toString());  
 });
 
 test('trims whitespace only when both $placeholder$ and data specified', function () {
 
   var s = ' $space$ ';
 
-  assert(s.template({ space: 'trimmed'}).toString() === 'trimmed');
+  assert(s.template({ space: 'trimmed'}) === 'trimmed');
 });
 
 test('trims whitespace in multiline strings', function () {
@@ -46,7 +46,7 @@ test('trims whitespace in multiline strings', function () {
 
   assert(s.template({ 
     space: 'trimmed'
-  }).toString() === ['trimmed', 'nospace', 'space'].join('\n'));
+  }) === ['trimmed', 'nospace', 'space'].join('\n'));
 });
   
   
@@ -56,28 +56,28 @@ test('returns without processing when data argument is not an object', function 
 
   var s = '<p>$title$</p>';
 
-  assert(s.template('data test').toString() === s.toString());
+  assert(s.template('data test') === s.toString());
 });
 
 test('replaces matched $placeholder$ data', function () {
 
   var s = '<p>$value$</p>';
   
-  assert(s.template({ value: 'placeholder' }).toString() === '<p>placeholder</p>');
+  assert(s.template({ value: 'placeholder' }) === '<p>placeholder</p>');
 });
 
 test('replaces un-matched $placeholder$ data with undefined', function () {
 
   var s = '<p>$value$</p>';
   
-  assert(s.template({ wrongName: 'placeholder' }).toString() === '<p>undefined</p>');
+  assert(s.template({ wrongName: 'placeholder' }) === '<p>undefined</p>');
 });
 
 test('$ chars inside $placeholder$ data are preserved', function () {
 
   var s = '<p>$dollar$</p>';
   
-  assert(s.template({ dollar: '$1.00' }).toString() === '<p>$1.00</p>');
+  assert(s.template({ dollar: '$1.00' }) === '<p>$1.00</p>');
 });
 
 test('replaces $nested.placeholder$ data', function () {
@@ -88,7 +88,7 @@ test('replaces $nested.placeholder$ data', function () {
     nested: {
       value: 'placeholder' 
     }
-  }).toString() === '<p>placeholder</p>');
+  }) === '<p>placeholder</p>');
 });
 
 
@@ -101,7 +101,7 @@ test('returns index values in multiple rows when data argument is array using @.
   
   assert(s.template([
     33, false
-  ]).toString() === ['<li>33</li>', '<li>false</li>'].join('\n'));
+  ]) === ['<li>33</li>', '<li>false</li>'].join('\n'));
 });
 
 test('returns item values in multiple rows when data argument is array using @.@' +
@@ -112,7 +112,7 @@ test('returns item values in multiple rows when data argument is array using @.@
   assert(s.template([
     { name: 'charlize' },
     { name: 'zora neale' }
-  ]).toString() === ['<li>charlize</li>', '<li>zora neale</li>'].join('\n'));
+  ]) === ['<li>charlize</li>', '<li>zora neale</li>'].join('\n'));
 });
 
 test('replaces nested array index values using @array@ $.$ @/@', function () {
@@ -120,7 +120,7 @@ test('replaces nested array index values using @array@ $.$ @/@', function () {
   
   assert(s.template({ 
     array: [ 'three', 'four', 'five' ]
-  }).toString() === ['<li>three</li>', '<li>four</li>', '<li>five</li>'].join('\n'));
+  }) === ['<li>three</li>', '<li>four</li>', '<li>five</li>'].join('\n'));
 });
 
 test('replaces nested array item values using @array@ $item$ @/@', function () {
@@ -131,7 +131,7 @@ test('replaces nested array item values using @array@ $item$ @/@', function () {
       { item: 'one' },
       { item: 'two' }
     ]
-  }).toString() === ['<li>one</li>', '<li>two</li>'].join('\n'));
+  }) === ['<li>one</li>', '<li>two</li>'].join('\n'));
 });
 
 test('groups multi-row data by array index', function () {
@@ -175,7 +175,7 @@ test('@array@ returns empty string when template does not contain newline \\n' +
       { item: 'one' },
       { item: 'two' }
     ]
-  }).toString() === '');
+  }) === '');
 });
 
 test('@array@ returns an Error (does not throw) when template does not contain closing' +
@@ -188,7 +188,7 @@ test('@array@ returns an Error (does not throw) when template does not contain c
       { item: 'one' },
       { item: 'two' }
     ]
-  }).message == 'Error: closing @/@ tag for @missingEndTag@ array not found');
+  }).message === 'Error: closing @/@ tag for @missingEndTag@ array not found');
 });
 
 test('nested @array@ directives are not supported', function () {
@@ -199,11 +199,7 @@ test('nested @array@ directives are not supported', function () {
     array: [
       { nested: [1,2,3] }
     ]
-  }).toString() == [
-    '@nested@', 
-    '+ [object Object]', 
-    '@/@'
-  ].join('\n'));
+  }) === ['@nested@', '+ [object Object]', '@/@'].join('\n'));
 });
 
 
@@ -364,7 +360,7 @@ test('processes complex data map', function () {
     '</ul>'
   ].join('\n');
   
-  assert(temp.template(data) == expected);
+  assert(temp.template(data) === expected);
 });
 
 test('results can be combined via data argument', function () {
@@ -401,7 +397,7 @@ test('results can be combined via data argument', function () {
     '</ul>'
   ].join('\n');
   
-  assert(t == expected);
+  assert(t === expected);
 });
 
 /*
