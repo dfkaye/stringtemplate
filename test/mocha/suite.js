@@ -19,18 +19,18 @@ test('returns same when argument is not an object', function () {
 
   var s = '';
   
-  assert(s.template() === s.toString());
-  assert(s.template(1) === s.toString());
-  assert(s.template(true) === s.toString());
+  assert(s.template() === s);
+  assert(s.template(1) === s);
+  assert(s.template(true) === s);
 });
 
 test('returns same when argument is an empty object or array', function () {
 
   var s = '';
   
-  assert(s.template(null) === s.toString());
-  assert(s.template({}) === s.toString());
-  assert(s.template([]) === s.toString());  
+  assert(s.template(null) === s);
+  assert(s.template({}) === s);
+  assert(s.template([]) === s);  
 });
 
 test('trims whitespace only when both $placeholder$ and data specified', function () {
@@ -56,7 +56,7 @@ test('returns without processing when data argument is not an object', function 
 
   var s = '<p>$title$</p>';
 
-  assert(s.template('data test') === s.toString());
+  assert(s.template('data test') === s);
 });
 
 test('replaces matched $placeholder$ data', function () {
