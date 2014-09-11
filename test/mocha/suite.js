@@ -294,9 +294,7 @@ test('returns docstring without processing when data argument is not an' +
 
 suite('complex examples');
 
-test.only('processes complex data map', function () {
-
-  //console.log('AHA ~ test failing ONLY on travis due line comment regex fail on first line');
+test('processes complex data map', function () {
 
   function temp() {
    /***
@@ -366,12 +364,7 @@ test.only('processes complex data map', function () {
     '</ul>'
   ].join('\n');
   
-  var actual = temp.template(data);
-  
-  console.log(actual.length + ':\n' + actual);
-  console.log(expected.length  + ':\n' + expected);
-
-  assert(actual == expected);
+  assert(temp.template(data) == expected);
 });
 
 test('results can be combined via data argument', function () {
