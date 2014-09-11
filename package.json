@@ -1,7 +1,7 @@
 {
   "name": "stringtemplate",
-  "version": "0.0.0",
-  "description": "[in slow progress] adds template() method to String.prototype and Function.prototype",
+  "version": "0.0.1",
+  "description": "Logic-less Templates in JavaScript",
   "main": "stringtemplate.js",
   "devDependencies": {
     "mocha": ">= 1.7"
