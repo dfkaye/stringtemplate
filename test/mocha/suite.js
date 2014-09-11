@@ -364,7 +364,12 @@ test('processes complex data map', function () {
     '</ul>'
   ].join('\n');
   
-  assert(temp.template(data) == expected);
+  var actual = temp.template(data);
+  
+  console.log(actual.length + ':\n' + actual);
+  console.log(expected.length  + ':\n' + expected);
+
+  assert(actual == expected);
 });
 
 test('results can be combined via data argument', function () {
