@@ -43,7 +43,7 @@ typeof String.prototype.trim == 'function' ||
 typeof String.prototype.template == 'function' ||
 (String.prototype.template = function template(data) {
 
-  if (!this.match(/\$[^\$]+\$/g) || !data) {
+  if (!this.match(/\$[^\$]+\$/g) || !data || typeof data != 'object') {
     return this;
   }
 
@@ -89,9 +89,9 @@ typeof String.prototype.template == 'function' ||
         
         if (i ===  rows.length - 1) {
         
-          // rather than throw an error, return this message as the result
-          
-          return 'Error: closing @/@ tag for ' + arrayStart[0] + ' array not found';
+          // return an error but do not throw it here          
+          return new Error('Error: closing @/@ tag for ' + arrayStart[0] + 
+                           ' array not found');
         }
         
         block.push(rows[i].trim());
@@ -164,7 +164,7 @@ typeof Function.prototype.template == 'function' ||
                  .replace(/[\}]$/, '');
   var table = fnBody.match(/\/(\*){3,3}[^\*]+(\*){3,3}\//);
   var rows = (table && table[0] || fnBody)
-              .replace(/(\s*)\/\/[^\r]*/g, '') // remove line comments...
+              .replace(/\/\/[^\r]*/g, '') // remove line comments...
               .replace(/(\/\*+)*[\r]*(\*+\/)*/g, '') // ...block comments
               .split('\n'); // and split by newline
               

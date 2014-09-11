@@ -16,6 +16,7 @@ test('is method', function () {
 });
 
 test('returns same when argument is not an object', function () {
+
   var s = '';
   
   assert(s.template().toString() === s.toString());
@@ -24,6 +25,7 @@ test('returns same when argument is not an object', function () {
 });
 
 test('returns same when argument is an empty object or array', function () {
+
   var s = '';
   
   assert(s.template(null).toString() === s.toString());
@@ -32,12 +34,14 @@ test('returns same when argument is an empty object or array', function () {
 });
 
 test('trims whitespace only when both $placeholder$ and data specified', function () {
+
   var s = ' $space$ ';
 
   assert(s.template({ space: 'trimmed'}).toString() === 'trimmed');
 });
 
 test('trims whitespace in multiline strings', function () {
+
   var s = [' $space$ ', 'nospace', ' space '].join('\n');
 
   assert(s.template({ 
@@ -48,25 +52,36 @@ test('trims whitespace in multiline strings', function () {
   
 suite('$placeholders$');
 
+test('returns without processing when data argument is not an object', function () {
+
+  var s = '<p>$title$</p>';
+
+  assert(s.template('data test').toString() === s.toString());
+});
+
 test('replaces matched $placeholder$ data', function () {
+
   var s = '<p>$value$</p>';
   
   assert(s.template({ value: 'placeholder' }).toString() === '<p>placeholder</p>');
 });
 
 test('replaces un-matched $placeholder$ data with undefined', function () {
+
   var s = '<p>$value$</p>';
   
   assert(s.template({ wrongName: 'placeholder' }).toString() === '<p>undefined</p>');
 });
 
 test('$ chars inside $placeholder$ data are preserved', function () {
+
   var s = '<p>$dollar$</p>';
   
   assert(s.template({ dollar: '$1.00' }).toString() === '<p>$1.00</p>');
 });
 
 test('replaces $nested.placeholder$ data', function () {
+
   var s = '<p>$nested.value$</p>';
   
   assert(s.template({ 
@@ -79,7 +94,9 @@ test('replaces $nested.placeholder$ data', function () {
 
 suite('@array@, @.@, $arrayItem$, $.$, and @/@');
 
-test('returns index values in multiple rows when data argument is array using @.@ $.$ @/@', function () {
+test('returns index values in multiple rows when data argument is array using @.@ $.$' +
+  ' @/@', function () {
+  
   var s = ['@.@', '<li>$.$</li>', '@/@'].join('\n');
   
   assert(s.template([
@@ -87,7 +104,9 @@ test('returns index values in multiple rows when data argument is array using @.
   ]).toString() === ['<li>33</li>', '<li>false</li>'].join('\n'));
 });
 
-test('returns item values in multiple rows when data argument is array using @.@ $name$ @/@', function () {
+test('returns item values in multiple rows when data argument is array using @.@' +
+  ' $name$ @/@', function () {
+  
   var s = ['@.@', '<li>$name$</li>', '@/@'].join('\n');
   
   assert(s.template([
@@ -117,8 +136,14 @@ test('replaces nested array item values using @array@ $item$ @/@', function () {
 
 test('groups multi-row data by array index', function () {
 
-  // list
-  var list = ['<ul>', '@addresses@', '<li>$street$</li>', '<li>$city$, $state$</li>', '@/@', '</ul>'].join('\n');
+  var list = [
+    '<ul>', 
+    '@addresses@', 
+    '<li>$street$</li>', 
+    '<li>$city$, $state$</li>', 
+    '@/@', 
+    '</ul>'
+  ].join('\n');
 
   var t = list.template({ 
     addresses: [
@@ -140,9 +165,9 @@ test('groups multi-row data by array index', function () {
   ].join('\n'));
 });
 
-
-
-test('@array@ returns empty string when template does not contain newline \\n chars', function () {
+test('@array@ returns empty string when template does not contain newline \\n' + 
+  'chars', function () {
+  
   var s = ['@array@', '<li>$item$</li>', '@/@'].join();
   
   assert(s.template({ 
@@ -153,7 +178,9 @@ test('@array@ returns empty string when template does not contain newline \\n ch
   }).toString() === '');
 });
 
-test('@array@ returns error Message (does not throw) when template does not contain closing @/@ tag', function () {
+test('@array@ returns an Error (does not throw) when template does not contain closing' +
+     ' @/@ tag', function () {
+     
   var s = ['@missingEndTag@', '<li>$item$</li>'].join('\n');
   
   assert(s.template({ 
@@ -161,17 +188,22 @@ test('@array@ returns error Message (does not throw) when template does not cont
       { item: 'one' },
       { item: 'two' }
     ]
-  }).toString() == 'Error: closing @/@ tag for @missingEndTag@ array not found');
+  }).message == 'Error: closing @/@ tag for @missingEndTag@ array not found');
 });
 
 test('nested @array@ directives are not supported', function () {
+
   var s = ['@array@', '@nested@', ' + $.$', '@/@', '@/@'].join('\n');
   
   assert(s.template({ 
     array: [
       { nested: [1,2,3] }
     ]
-  }).toString() == ['@nested@', '+ [object Object]', '@/@'].join('\n'));
+  }).toString() == [
+    '@nested@', 
+    '+ [object Object]', 
+    '@/@'
+  ].join('\n'));
 });
 
 
@@ -181,13 +213,16 @@ test('is method', function () {
   assert(typeof (function(){}).template == 'function');
 });
 
-test('returns an empty string when function contains no /*** and ***/ delimiters', function () {
+test('returns an empty string when function contains no /*** and ***/' +
+  ' delimiters', function () {
+  
   function temp() {}
   
   assert(temp.template() === '');
 });
 
 test('returns trimmed docstring between /*** and ***/ delimiters', function () {
+
   function temp() {
   /***
   Hello.
@@ -196,10 +231,15 @@ test('returns trimmed docstring between /*** and ***/ delimiters', function () {
   ***/
   }
   
-  assert(temp.template() === ['Hello.', 'I am a docstring,', 'inside a function.'].join('\n'));
+  assert(temp.template() === [
+    'Hello.', 
+    'I am a docstring,', 
+    'inside a function.'
+  ].join('\n'));
 });
 
 test('removes blank lines from  /*** docstring ***/', function () {
+
   function temp() {
   /***
   first
@@ -214,6 +254,7 @@ test('removes blank lines from  /*** docstring ***/', function () {
 });
 
 test('removes line comments found within /*** docstring ***/', function () {
+
   function temp() {
   /***
   Hello.  // I am a comment
@@ -226,6 +267,7 @@ test('removes line comments found within /*** docstring ***/', function () {
 });
 
 test('calls string#template on docstring when data argument is specified', function () {
+
   function temp() {
   /***
   <p>$title$</p>
@@ -235,6 +277,18 @@ test('calls string#template on docstring when data argument is specified', funct
   var data = { title: 'data test' };
 
   assert(temp.template(data) === '<p>data test</p>');
+});
+
+test('returns docstring without processing when data argument is not an' +
+  ' object', function () {
+  
+  function temp() {
+  /***
+  <p>$title$</p>
+  ***/
+  }
+
+  assert(temp.template('data test') === '<p>$title$</p>');
 });
 
 
@@ -290,7 +344,8 @@ test('processes complex data map', function () {
     list: [ 'a', 'b', 'c' ]
   };
   
-  var expected = ['<p>complex data test</p>',
+  var expected = [
+    '<p>complex data test</p>',
     '<p>this is a property value at $object.main.property$, name: sarah winchester</p>',
     '<ul>',
     '<li>david, 28</li>',
@@ -306,16 +361,26 @@ test('processes complex data map', function () {
     '<li>a</li>',
     '<li>b</li>',
     '<li>c</li>',
-    '</ul>'].join('\n');
+    '</ul>'
+  ].join('\n');
   
   assert(temp.template(data) == expected);
 });
 
 test('results can be combined via data argument', function () {
 
-  // list
-  var list = ['<ul>', '$addresses$', '</ul>'].join('\n');
-  var address = ['@.@', '<li>$street$</li>', '<li>$city$, $state$</li>', '@/@'].join('\n');
+  var list = [
+    '<ul>', 
+    '$addresses$', 
+    '</ul>'
+  ].join('\n');
+              
+  var address = [
+    '@.@', 
+    '<li>$street$</li>', 
+    '<li>$city$, $state$</li>', 
+    '@/@'
+  ].join('\n');
 
   var t = list.template({
     addresses: address.template([
