@@ -69,6 +69,7 @@
     var sub;
     var hash = /\$\[\#\]\$/g.exec(content);
     var hashKey = content.match(/\$\[\#\]\.[^\$^\s]+\$/g);
+    var key;
     
     for (var k in node) {
 
