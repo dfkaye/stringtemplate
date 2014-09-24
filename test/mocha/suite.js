@@ -68,7 +68,7 @@ test('$ chars inside $placeholder$ data are preserved', function () {
   assert(s.template({ dollar: '$<b>1.00</b>' }) === '<p>$<b>1.00</b></p>');
 });
 
-test('replaces $nested.placeholder$ data', function () {
+test('replaces $nested.value$ data', function () {
 
   var s = '<p>$nested.value$</p>';
   
@@ -79,32 +79,84 @@ test('replaces $nested.placeholder$ data', function () {
   }) === '<p>placeholder</p>');
 });
 
+suite('blocks');
+
+test('replaces $object$ $[#]$ $/object$ data', function () {
+
+  var s = [
+    '$object$',
+    '<p>$[#]$</p>',
+    '$/object$'
+  ].join('');
+  
+  var data = { 
+    object: {
+      value: 'value',
+      name: 'name'
+    }
+  };
+  
+  assert(s.template(data) === '<p>value</p><p>name</p>');
+});
+
 
 suite('arrays');
 
 test('replaces indexed array data', function () {
   
-  var s = ['$[#]$', '<li>$[#]$</li>', '$/[#]$'].join('\n');
-  var data = [
-    33, false
-  ];
+  var s = [
+    '$[#]$', 
+    '<li>$[#]$</li>', 
+    '$/[#]$'
+  ].join('\n');
+  
+  var data = [ 33, false ];
 
-  assert(s.template(data) === ['', '<li>33</li>', '', '<li>false</li>', ''].join('\n'));
+  var expected = [
+    '', 
+    '<li>33</li>',
+    '',
+    '<li>false</li>',
+    ''
+  ].join('\n');
+  
+  assert(s.template(data) === expected);
 });
 
 test('replaces indexed object key-value data', function () {
   
-  var s = ['$[#]$', '<li>$[#].name$</li>', '$/[#]$'].join('\n');
-  
-  assert(s.template([
+  var s = [
+    '$[#]$',
+    '<li>$[#].name$</li>',
+    '$/[#]$'
+  ].join('\n');
+
+  var data = [
     { name: 'charlize' },
     { name: 'zora neale' }
-  ]) === ['', '<li>charlize</li>', '', '<li>zora neale</li>', ''].join('\n'));
+  ];
+  
+  var expected = [
+    '',
+    '<li>charlize</li>',
+    '',
+    '<li>zora neale</li>',
+    ''
+  ].join('\n');
+  
+  assert(s.template(data) === expected);
 });
 
-test('replaces nested array index values using $array$ $[#]$ and $/array$', function () {
+test('replaces array index values using $array$ $[#]$ and $/array$', function () {
 
-  var s = ['<ul>', '$array$', '<li>$[#]$</li>', '$/array$', '</ul>'].join('\n');
+  var s = [
+    '<ul>', 
+    '$array$', 
+    '<li>$[#]$</li>', 
+    '$/array$', 
+    '</ul>'
+  ].join('\n');
+  
   var data = { 
     array: [ 'three', 'four', 'five' ]
   };
@@ -118,9 +170,15 @@ test('replaces nested array index values using $array$ $[#]$ and $/array$', func
   ].join('\n'));
 });
 
-test('replaces nested array item values using $array$ $[#].item$ and $/array$', function () {
+test('replaces array item values using $array$ $[#].item$ and $/array$', function () {
 
-  var s = ['<ul>', '$array$', '<li>$[#].item$</li>', '$/array$', '</ul>'].join('\n');
+  var s = [
+    '<ul>', 
+    '$array$', 
+    '<li>$[#].item$</li>', 
+    '$/array$', 
+    '</ul>'
+  ].join('\n');
   
   var data = { 
     array: [
@@ -129,13 +187,15 @@ test('replaces nested array item values using $array$ $[#].item$ and $/array$', 
     ]
   };
 
-  // replace blank 'rows' in result
-  assert(s.template(data).replace(/\n\n/g, '\n') === [
+  var expected = [
     '<ul>', 
     '<li>one</li>', 
     '<li>two</li>', 
     '</ul>'
-  ].join('\n'));
+  ].join('\n');
+  
+  // replace blank 'rows' in result
+  assert(s.template(data).replace(/\n\n/g, '\n') === expected);
 });
 
 test('groups multi-row key-value data by array index', function () {
@@ -156,9 +216,8 @@ test('groups multi-row key-value data by array index', function () {
       { street: '910 twelfth street', city: 'villetown', state: 'cc' }
     ]
   });
-
-  // replace blank 'rows' in result
-  assert(t.replace(/\n\n/g, '\n') === [
+  
+  var expected = [
     '<ul>',
     '<li>123 fourth street</li>',
     '<li>cityburgh, aa</li>',
@@ -167,29 +226,40 @@ test('groups multi-row key-value data by array index', function () {
     '<li>910 twelfth street</li>',
     '<li>villetown, cc</li>',
     '</ul>'
-  ].join('\n'));
+  ].join('\n');
+
+  // replace blank 'rows' in result
+  assert(t.replace(/\n\n/g, '\n') === expected);
 });
 
 
 suite('bad arrays');
 
-test('$array$...$/array$ not iterated when missing [#] tokens', function () {
+test('$array$...$/array$ not processed when missing $[#]$ tokens', function () {
   
   var s = ['$array$', '<li>$item$</li>', '$/array$'].join('');
+  
   var data = { 
     array: [
       { item: 'one' },
       { item: 'two' }
     ]
   };
- 
-  assert(s.template(data) === ['$array$', '<li>$item$</li>', '$/array$'].join(''));
+  
+  var expected = ['$array$', '<li>$item$</li>', '$/array$'].join('');
+  
+  assert(s.template(data) === expected);
 });
 
-test('FIX ME ~ $array$ produces mismatched output when template does not contain closing' +
-     ' $/array$ tag', function () {
+test('$array$ $[#]$ not processed when missing $/array$ token', function () {
      
-  var s = ['<ul>', '$missingEndTag$', '<li>$[#].item$</li>', '</ul>'].join('\n');
+  var s = [
+    '<ul>', 
+    '$missingEndTag$', 
+    '<li>$[#].item$</li>', 
+    '</ul>'
+  ].join('\n');
+  
   var data = { 
     missingEndTag: [
       { item: 'one' },
@@ -197,26 +267,33 @@ test('FIX ME ~ $array$ produces mismatched output when template does not contain
     ]
   };
   
-  assert(s.template(data) === [
+  var expected = [
     '<ul>', 
     data.missingEndTag.toString(), 
     '<li>$[#].item$</li>',
     '</ul>'
-    ].join('\n'));
+  ].join('\n');
+    
+  assert(s.template(data) === expected);
 });
 
 test('nested $array$ directives are supported', function () {
 
-  var s = ['$array$', '$[#].nested$', ' + $[#]$', '$/[#].nested$', '$/array$'].join('\n');
+  var s = [
+    '$array$', 
+    '$[#].nested$', 
+    ' + $[#]$', 
+    '$/[#].nested$', 
+    '$/array$'
+  ].join('\n');
+  
   var data = { 
     array: [
       { nested: [1,2,3] }
     ]
   };
   
-  //console.warn(  s.template(data) );
-  
-  assert(s.template(data) === [
+  var expected = [
     '', 
     '', 
     ' + 1', 
@@ -226,7 +303,11 @@ test('nested $array$ directives are supported', function () {
     ' + 3',
     '', 
     '', 
-    ].join('\n'));
+  ].join('\n');
+
+  //console.warn(  s.template(data) );
+
+  assert(s.template(data) === expected);
 });
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -315,7 +396,7 @@ test('does not remove blank lines from  /*** docstring ***/', function () {
   
   var expected = ['', '  first', '  ', '  second', '  ', '  third', '  '].join('\n');
 
-  assert(temp.template() === expected );
+  assert(temp.template() === expected);
 });
 
 test('removes blank lines from  /*** docstring ***/ when data argument specified', function () {
@@ -362,6 +443,7 @@ test('calls string#template on docstring when data argument is specified', funct
 test('trims whitespace in multiline strings when data argument is specified', function () {
 
   var s = [' $space$ ', 'nospace', ' space '].join('\n');
+  
   var data = { 
     space: 'trimmed'
   };
@@ -389,9 +471,9 @@ test('returns unprocessed docstring when data argument is not an object', functi
 });
 
 
-suite('complex examples');
+suite('mixed data examples');
 
-test('processes complex data map', function () {
+test('processes mixed data map', function () {
 
   function temp() {
    /***
@@ -419,7 +501,7 @@ test('processes complex data map', function () {
   }
   
   var data = {
-    title: 'complex data test',
+    title: 'mixed data test',
     object: { 
       main: {
         property: 'this is a property value at $object.main.property$', 
@@ -442,7 +524,7 @@ test('processes complex data map', function () {
   };
   
   var expected = [
-    '<p>complex data test</p>',
+    '<p>mixed data test</p>',
     '<p>this is a property value at $object.main.property$, name: sarah winchester</p>',
     '<ul>',
     '',
@@ -478,7 +560,7 @@ test('processes complex data map', function () {
   assert(temp.template(data) === expected);
 });
 
-test('template results can be combined via data argument', function () {
+test(' template results can be combined via data argument', function () {
 
   var list = [
     '<ul>', 
@@ -492,6 +574,8 @@ test('template results can be combined via data argument', function () {
     '<li>$[#].city$, $[#].state$</li>', 
     '$/[#]$'
   ].join('\n');
+  
+ 
 
   var t = list.template({
     addresses: address.template([

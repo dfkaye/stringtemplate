@@ -1,76 +1,80 @@
+// Sept 4-5, 2014 ~ start the zero-recursion version
+// Sept 6 - still in progress but most array drilldown is done
+// Sept 9 ~ cleaned up array v placeholder detection and drilldown
+// Sept 16 ~ finally ~ looks like complex data mapping is solved...
+// Sept 18 ~ get off of rows
 // version started 20 sept 2014
+// Sept 23 ~ nested array case solved
+ 
 // stringtemplate.js
 
+/*
+ * David F. Kaye (@dfkaye)
+ * 18 SEPT 2014 -  (final nested case solved 23 SEPT 2014 12:04 - 12:20 PM PDT)
+ * still in progress ~ still largely out of his mind
+ *
+ * JSON License (Modified MIT)
+ *
+ * string.template() replaces doc-string tokens with corresponding data values, using 
+ * simplest token set and syntax as possible.
+ *
+ * inspired by Terence Parr (StringTemplate) and Krasimir Tsonev (AbsurdJS)
+ *
+ * data argument may be either an Object or an Array.  
+ * empty arguments and primitives are ignored
+ *
+ * goals of this project
+ * + no internal use of Function() constructor (handlebars, absurdjs, riot.js)
+ * + no formatting
+ * + no default substitution or suppression of empty values (no 'undefined')
+ * + no if/else logic tokens 
+ * + no error throwing
+ * + prefer dynamic programming to recursion until unavoidable
+ *
+ * standalone JavaScript method by hand means
+ * + for-loop + if-else hell
+ * + while-loop hell
+ * + regular expressions ~ test them online with http://www.cuneytyilmaz.com/prog/jrx/ 
+ * + sub-string manipulation ~ http://davidwalsh.name/string-replace-javascript
+ * + figuring out token delimiters and reasonable placeholder syntax
+ */
+   
 //typeof String.prototype.template == 'function' ||
 (String.prototype.template = function template(data) {
 
+  /* Utility functions */
+
   /*
-   * David F. Kaye (@dfkaye)
-   * 18 SEPT 2014 -  (final nested case solved 23 SEPT 2014 12:04 - 12:20 PM PDT)
-   * still in progress ~ still largely out of his mind
-   *
-   * JSON License (Modified MIT)
-   *
-   * string.template() replaces doc-string tokens with corresponding data values, using 
-   * simplest token set and syntax as possible.
-   *
-   * inspired by Terence Parr (StringTemplate) and Krasimir Tsonev (AbsurdJS)
-   *
-   * data argument may be either an Object or an Array.  
-   * empty arguments and primitives are ignored
-   *
-   * goals of this project
-   * + no internal use of Function() constructor (handlebars, absurdjs, riot.js)
-   * + no formatting (parr)
-   * + no default substitution or suppression of empty values (no 'undefined')
-   * + no if/else logic tags 
-   * + no error throwing
-   *
-   * standalone JavaScript method by hand means
-   * + for-loop + if-else hell
-   * + while-loop hell
-   * + regular expressions ~ test them online with http://www.cuneytyilmaz.com/prog/jrx/ 
-   * + sub-string manipulation ~ http://davidwalsh.name/string-replace-javascript
-   * + figuring out token delimiters and reasonable placeholder syntax
+   * map token to data node
+   * returns node if found, else returns undefined
    */
+  function resolvePath(token, node) {
+  
+    var path = token.replace(/\$/g, '').split('.');
+    var p = 0;
 
-  var reTag = /\$[^\$^\s]+\$/; // any tokens
-  var reStartTag = /\$[^\$^\#^\s^\/]+\$/; // start tag that is not a hash
-  var reHash = /\$\[\#\]\$/g; // index or keyname
-  var reHashKey = /\$\[\#\]\.[^\$^\s]+\$/g; // indexed keyname, array[0].name
-  var reEndTag = /\$\/[^\$^\s]+\$/; // closing tag
-  var reEndHash = /\$\/\[\#\]?[^\$^\s]+\$/;
-  
-  var src = this.toString(); // will return modified source 
-  var tags = src.match(RegExp(reTag.source, 'gm'));
-  var hashes = src.match(RegExp(reEndHash.source, 'gm'));
-  
-  if (!data || !tags || ({}.toString.call(data) == '[object Array]' && !hashes)) {
-    return src;
+    while (node && p < path.length) {
+      node = node[path[p++]];
+    }
+    
+    return node;
   }
-  
-  var i;
-  var j;
-  var p;
-  var path;
-  var node;
-  var endTag;
-  var match;
-  var nested;
-  var tag;
-  var content;
-  var nested;
-  var nestedEndTags;
-  var allNestedTags;
-  
-  function processBlock(content, node) {
 
+  /*
+   * processes the content of a tag block containing hashes but no other nested blocks
+   * uses recursion on itself if the content of an item is an array
+   * returns transformed string
+   */
+  function processBlock(content, node) {
+  
+    //console.log('**** processBlock ****: \n' + content);
+    //console.warn( node);
+    
     var temp = [];
-    var sub;
     var hash = /\$\[\#\]\$/g.exec(content);
     var hashKey = content.match(/\$\[\#\]\.[^\$^\s]+\$/g);
-    var key;
-    
+    var k, sub, n, i, key;
+
     for (var k in node) {
 
       sub = content.toString();
@@ -85,10 +89,11 @@
       if (hash && node[k] && typeof node[k] == 'object') {
 
         for (var n in node[k]) {
-        
-          // handle nested arrays directly with recursion
 
           if ({}.toString.call(node[k][n]) == '[object Array]') {
+          
+            // handle nested arrays directly with recursion on processBlock()
+
             temp.push(processBlock(content, node[k][n]));
           }
         }
@@ -113,37 +118,50 @@
     return temp.join('');
   }
   
+  /*
+   * processes the content of a tag block containing other tag blocks, not just hashes
+   * uses recursion on template() to transform tag content
+   * returns transformed string
+   */
   function handleNestedBlock(src, node) {
+  
+    //console.warn('**** handleNestedBlock ****: \n' + src);
+    //console.log( node);
 
-    var tags = src.match(RegExp(reTag.source, 'gm'));
+    var tokens = src.match(RegExp(reToken.source, 'gm'));
     var depth = -1;
     var startIndex = 0;
     var endIndex = 0;
+    var token;
     var tag;
     var content;
     
-    for (var i = 0; i < tags.length; ++i) {
-      
-      if (!reEndTag.test(tags[i])) {
-        startIndex || (startIndex = tags[i].length);
-        depth += 1;
-      }
+    for (var i = 0; i < tokens.length; ++i) {
+    
+      token = tokens[i];
 
-      if (reEndTag.test(tags[i])) {
+      if (reEndTag.test(token)) {
+      
         depth -= 1;
-        endIndex = src.indexOf(tags[i], endIndex + 1);
+        endIndex = src.indexOf(token, endIndex + 1);
+        
+      } else {
+      
+        startIndex || (startIndex = token.length);
+        depth += 1;
       }
 
       if (depth === 0 && startIndex > 0 && endIndex > 0) {
 
         // content vs tag 12:45 PM PDT 18 SEPT 2104
 
-        tag = src.substring(0, endIndex + tags[i].length);
+        tag = src.substring(0, endIndex + token.length);
         content = src.substring(startIndex, endIndex);      
 
-        // handle nested block fragments with recursion
+        // handle nested tag blocks with recursion on template()
         
         src = src.replace(tag, content.template(node));
+        
         break;
       }
     }
@@ -151,75 +169,116 @@
     return src;
   }
   
-  // simple case: any.object.tag with no matching end tag
+  /* main process */
   
-  tags = src.match(RegExp(reStartTag.source, 'gm')) || [];
+  var reToken = /\$[^\$^\s]+\$/; // any tokens
+  var reStartTag = /\$[^\$^\#^\s^\/]+\$/; // start tag that is not a hash
+  var reHash = /\$\[\#\]\$/g; // index or keyname
+  var reHashKey = /\$\[\#\]\.[^\$^\s]+\$/g; // indexed keyname, array[0].name
+  var reEndTag = /\$\/[^\$^\s]+\$/; // closing tag
+  var reEndHash = /\$\/\[\#\]?[^\$^\s]+\$/;
   
-  for (i = 0; i < tags.length; ++i) {
+  var src = this.toString(); // will return modified source 
+  var tokens = src.match(RegExp(reToken.source, 'gm'));
+  var hashes = src.match(RegExp(reEndHash.source, 'gm'));
+  
+  /*
+   * return src early if no data or tokens, or data is array but no hashes found in src
+   */  
+  if (!data || !tokens || ({}.toString.call(data) == '[object Array]' && !hashes)) {
 
-    if (!src.match( RegExp(tags[i].replace('$', '$/').replace(/\$/g, '\\$'), 'gm') )) {
-
-      tag = tags[i];
-      node = data;      
-      path = tag.replace(/\$/g, '').split('.');
-      p = 0;
+    return src;
+  }
     
-      while (node && p < path.length) {
-        node = node[path[p++]];
-      }
+  var visited = {};
+  
+  var i, token, tag, node;
+  var endToken, match, j, content;
+  var nested, nestedEndTags, allNestedTags;
+  
+  // pass #1 simple case: replace $an.object.token$ with no matching end token
+  
+  tokens = src.match(RegExp(reStartTag.source, 'gm')) || [];
+  
+  for (i = 0; i < tokens.length; ++i) {
 
-      !node || (src = src.replace(RegExp(tag.replace(/\$/g, '\\$'), 'gm'), node));
+    token = tokens[i];
+
+    if (visited[token]) {
+      continue;
+    }
+    
+    visited[token] = token;
+    
+    if (!src.match( RegExp(token.replace('$', '$/').replace(/\$/g, '\\$'), 'gm') )) {
+      
+      node = resolvePath(token, data);
+      !node || (src = src.replace(RegExp(token.replace(/\$/g, '\\$'), 'gm'), node));
     }
   }
   
-  // block case: $tag$ $[#]$ $/tag$, $tag$ $[#.key]$ $/tag$, $[#.key]$ $[#]$ $[/#.key]$
-  
-  tags = src.match(RegExp(reTag.source, 'gm')) || [];
-  
-  for (i = 0; i < tags.length; ++i) {
-     
-    // find matching end tag
+  /*
+   * pass #2 block case: replace block tags (with matching end tokens):
+   *
+   *  array or object:
+   *    $token$ $[#]$ $/token$
+   *    $token$ $[#.key]$ $/token$
+   *
+   *  array
+   *    $[#]$ $[#]$ $[/#]$
+   *    $[#.key]$ $[#]$ $[/#.key]$
+   */
+  tokens = src.match(RegExp(reToken.source, 'gm')) || [];
 
-    endTag = tags[i].replace(/\$/g, '\\$').replace('$', '$\\/').replace('[#]', '\\[\\#\\]');
-    match = src.match(RegExp(endTag, 'gm'));
+  for (i = 0; i < tokens.length; ++i) {
+     
+    token = tokens[i];
+    endToken = token.replace(/\$/g, '\\$').replace('$', '$\\/').replace('[#]', '\\[\\#\\]');
+    match = src.match(RegExp(endToken, 'gm'));
     
     if (match) {
 
       j = i;
       
-      while (j += 1 < tags.length) {
-        
-        if ( tags[j] === match[0] ) {
+      while (j += 1 < tokens.length) {
+
+        endToken = tokens[j];
+
+        if (endToken === match[0] ) {
           
-          tag = src.substring(src.indexOf(tags[i]), src.lastIndexOf(tags[j]) + tags[j].length);
-          content = tag.substring(tags[i].length, tag.lastIndexOf(tags[j]));
+          tag = src.substring(src.indexOf(token), src.lastIndexOf(endToken) + endToken.length);
+          content = tag.substring(token.length, tag.lastIndexOf(endToken));
           node = data;
          
-          if (!reHash.test(tags[i]) && !reHashKey.test(tags[i])) {
+          if (!reHash.test(token) && !reHashKey.test(token)) {
           
-            // current tag is not a hash, $[#]$ or $[/#.key]$
-            path = tags[i].replace(/\$/g, '').split('.');
-            p = 0;
-
-            while (node && p < path.length) {
-              node = node[path[p++]];
-            }
+            // current tag is not $[#]$ or $[#.key]$
+            
+            node = resolvePath(token, node);
           }
           
           if (node) {
             
+            nested = false;
             nestedEndTags = tag.match(RegExp(reEndTag.source, 'gm'));
             
             if (nestedEndTags && nestedEndTags.length >= 2) {
             
-              allNestedTags = tag.match(RegExp(reTag.source, 'gm'));
+              /*
+               * single nested end tokens are handled by the process case
+               * multiple nested end tokens are handled by the nested case
+               */
+               
+              allNestedTags = tag.match(RegExp(reToken.source, 'gm'));
               nested = allNestedTags.length - 2 * nestedEndTags.length === 1;
             }
 
             if (nested) {
-              src = src.replace(tag, handleNestedBlock(tag, node));
-            } else if (content.match(/\[\#\]/)) {
 
+              src = src.replace(tag, handleNestedBlock(tag, node));
+              
+            } else if (content.match(/\[\#\]/)) {
+            
               src = src.replace(tag, processBlock(content, node));
             }
           }
@@ -229,13 +288,11 @@
       }
     }
   }
-
-  //console.log(src);
   
   return src;
 });
 
-/**
+/*
 var d1 = {
   title: 'global title',
   array: ['foo', 'bar', 'baz', { key: 'quux' } ],
@@ -262,10 +319,12 @@ var s1 = [
   '$/objects$'
   ].join('');
 
-s1.template(d1);
+
+var t1 = s1.template(d1);
+console.log(t1);
 
 
-
+// stop supporting this 
 
 var s2 = [
   '$[#]$',
@@ -275,7 +334,8 @@ var s2 = [
 
 var d2 = ['foo', 'bar', 'baz', 'quux'];
 
-s2.template(d2);
+var t2 = s2.template(d2);
+console.log(t2);
 
 
 
@@ -296,8 +356,8 @@ var d3 = {
   ]
 };
 
-s3.template(d3);
-
+var t3 = s3.template(d3);
+console.log(t3);
 
 
 var s4 = [
@@ -307,7 +367,8 @@ var s4 = [
   "$inner$",
     "<li>",
       
-      "<p>$inner.title$</p>", // is this a valid case???
+      "<p>$inner.title$</p>", // if value tokens are evaluated after blocks can we change
+                              // this to $title$??
 
       "<ul>",
       "$inner$",
@@ -335,5 +396,6 @@ var d4 = {
   }
 };
 
-s4.template(d4);
-**/
+var t4 = s4.template(d4);
+console.log(t4);
+*/
