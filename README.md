@@ -1,7 +1,7 @@
 stringtemplate
 ==============
 
-[ IN PROGRESS ~ 11 Sept 2014 ]
+[ STILL IN PROGRESS ~ 24 Sept 2014 ]
 
 ## Logic-less Templates in JavaScript
 
@@ -51,7 +51,7 @@ methods to native/built-in types:
   - $placeholder$ ~ use value found at data.placeholder
   - $path.name$ ~ use value found at data.path.name
   - $/path.name$ ~ marks the end of an iterable data ~ must have a matching 
-      $path.name$ tag
+      $path.name$ token
   - $[#]$ ~ inside an iteration, use object value at each index [0, 1, 2...]
   - $[#].key$ ~ inside an iteration, use value found at [index].name
   
