@@ -39,16 +39,10 @@
   var reHash = /\$\[\#\]\$/g; // index or keyname
   var reHashKey = /\$\[\#\]\.[^\$^\s]+\$/g; // indexed keyname, array[0].name
   var reEndTag = /\$\/[^\$^\s]+\$/; // closing tag
-  var reEndHash = /\$\/\[\#\]?[^\$^\s]+\$/;
+  //var reEndHash = /\$\/\[\#\]?[^\$^\s]+\$/;
   
   var src = this.toString(); // will return modified source 
-  var tags = src.match(RegExp(reTag.source, 'gm'));
-  var hashes = src.match(RegExp(reEndHash.source, 'gm'));
-  
-  if (!data || !tags || ({}.toString.call(data) == '[object Array]' && !hashes)) {
-    return src;
-  }
-  
+  var tags;
   var i;
   var j;
   var p;
@@ -69,36 +63,20 @@
     var sub;
     var hash = /\$\[\#\]\$/g.exec(content);
     var hashKey = content.match(/\$\[\#\]\.[^\$^\s]+\$/g);
-    
+
     for (var k in node) {
 
       sub = content.toString();
-
+      
       if (hash && typeof node[k] != 'object') {
-      
-        // replace primitives directly
-        
         sub = sub.replace(hash[0], node[k]);
-      }
-      
-      if (hash && node[k] && typeof node[k] == 'object') {
-
-        for (var n in node[k]) {
-        
-          // handle nested arrays directly with recursion
-
-          if ({}.toString.call(node[k][n]) == '[object Array]') {
-            temp.push(processBlock(content, node[k][n]));
-          }
-        }
       }
       
       if (hashKey && typeof node[k] == 'object') {
 
         // object or array can have multiple hash.key references
-        
+
         for (var i = 0; i < hashKey.length; ++i) {
-        
           key = hashKey[i].split('.')[1].replace('$', '');
           sub = sub.replace(hashKey[i], node[k][key]);
         }
@@ -108,7 +86,6 @@
         temp.push(sub);
       }
     }
-    
     return temp.join('');
   }
   
@@ -140,8 +117,7 @@
         tag = src.substring(0, endIndex + tags[i].length);
         content = src.substring(startIndex, endIndex);      
 
-        // handle nested block fragments with recursion
-        
+        // recursive call
         src = src.replace(tag, content.template(node));
         break;
       }
@@ -152,28 +128,31 @@
   
   // simple case: any.object.tag with no matching end tag
   
-  tags = src.match(RegExp(reStartTag.source, 'gm')) || [];
+  tags = src.match(RegExp(reStartTag.source, 'gm'));
   
-  for (i = 0; i < tags.length; ++i) {
-
-    if (!src.match( RegExp(tags[i].replace('$', '$/').replace(/\$/g, '\\$'), 'gm') )) {
-
-      tag = tags[i];
-      node = data;      
-      path = tag.replace(/\$/g, '').split('.');
-      p = 0;
+  if (tags) {
     
-      while (node && p < path.length) {
-        node = node[path[p++]];
-      }
+    for (i = 0; i < tags.length; ++i) {
 
-      !node || (src = src.replace(RegExp(tag.replace(/\$/g, '\\$'), 'gm'), node));
+      if (!src.match( RegExp(tags[i].replace('$', '$/').replace(/\$/g, '\\$'), 'gm') )) {
+
+        tag = tags[i];
+        node = data;      
+        path = tag.replace(/\$/g, '').split('.');
+        p = 0;
+      
+        while (node && p < path.length) {
+          node = node[path[p++]];
+        }
+
+        !node || (src = src.replace(RegExp(tag.replace(/\$/g, '\\$'), 'gm'), node));
+      }
     }
   }
   
   // block case: $tag$ $[#]$ $/tag$, $tag$ $[#.key]$ $/tag$, $[#.key]$ $[#]$ $[/#.key]$
   
-  tags = src.match(RegExp(reTag.source, 'gm')) || [];
+  tags = src.match(RegExp(reTag.source, 'gm'));
   
   for (i = 0; i < tags.length; ++i) {
      
@@ -210,16 +189,14 @@
             nestedEndTags = tag.match(RegExp(reEndTag.source, 'gm'));
             
             if (nestedEndTags && nestedEndTags.length >= 2) {
-            
               allNestedTags = tag.match(RegExp(reTag.source, 'gm'));
               nested = allNestedTags.length - 2 * nestedEndTags.length === 1;
             }
 
-            if (nested) {
-              src = src.replace(tag, handleNestedBlock(tag, node));
-            } else if (content.match(/\[\#\]/)) {
-
+            if (!nested && content.match(/\[\#\]/g)) {
               src = src.replace(tag, processBlock(content, node));
+            } else {
+              src = src.replace(tag, handleNestedBlock(tag, node));
             }
           }
           
@@ -229,12 +206,12 @@
     }
   }
 
-  //console.log(src);
+  console.log(src);
   
   return src;
 });
 
-/**
+
 var d1 = {
   title: 'global title',
   array: ['foo', 'bar', 'baz', { key: 'quux' } ],
@@ -335,4 +312,3 @@ var d4 = {
 };
 
 s4.template(d4);
-**/

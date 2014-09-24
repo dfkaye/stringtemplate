@@ -1,6 +1,6 @@
 {
   "name": "stringtemplate",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Logic-less Templates in JavaScript",
   "main": "stringtemplate.js",
   "devDependencies": {

@@ -7,8 +7,9 @@ stringtemplate
 
 `stringtemplate` adds a `template()` method to `String.prototype` and 
 `Function.prototype` that act as a batch string#replace, using `$token$` 
-placeholders for values/objects and `@arrayName@` + `@/@` tokens for indexed 
-data (arrays). 
+placeholders for values/objects and `$objectOrArray$` and `$/objectOrArray$` 
+tokens to demarcate iterable data with `$[#]$` for array indexes or `$[#].key$` 
+for key-value data. 
 
 [![Build Status](https://travis-ci.org/dfkaye/stringtemplate.png?branch=master)]
 (https://travis-ci.org/dfkaye/stringtemplate)
@@ -49,13 +50,10 @@ methods to native/built-in types:
     
   - $placeholder$ ~ use value found at data.placeholder
   - $path.name$ ~ use value found at data.path.name
-  - @path.name@ ~ indicates start of array found at data.path.name
-  - @/@ ~ marks end of array scope in template
-  - $.$ ~ inside an array iteration, use object value at each index [0, 1, 2...]
-  - $name$ ~ inside an array iteration, use value found at array[index].name
-  - @.@ ~ use when the `data` param is an array, not just an object
-  - one known error case (missing @/@ during array iteration: returns a message,
-    rather than throwing an error)
+  - $/path.name$ ~ marks the end of an iterable data ~ must have a matching 
+      $path.name$ tag
+  - $[#]$ ~ inside an iteration, use object value at each index [0, 1, 2...]
+  - $[#].key$ ~ inside an iteration, use value found at [index].name
   
 + `Function.prototype.template(data)`
 
