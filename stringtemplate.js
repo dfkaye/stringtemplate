@@ -1,3 +1,55 @@
+// Sept  4-5, 2014 ~ aim at zero-recursion
+// Sept  6 ~ still in progress but most array drilldown is done
+// Sept  9 ~ cleaned up array v placeholder detection and drilldown
+// Sept 16 ~ finally ~ looks like complex data mapping is solved...
+// Sept 18 ~ get out of iterating by rows of strings
+// Sept 20 ~ ugh ~ new version started
+// Sept 23 ~ nested array case solved 23 SEPT 2014 12:04 - 12:20 PM PDT
+// Sept 24 ~ some renaming and comments
+// Sept 25 ~ intro some functional programming
+// Sept 26 ~ remove functional; use reverse-while on end tags w/content aliasing
+// Sept 27 ~ nested object-array tests working
+// Sept 29 ~ arrays and nested arrays working
+// Sept 30 ~ fixed array of objects with nested arrays
+
+/*
+ * stringtemplate
+ *
+ * David F. Kaye (@dfkaye)
+ *
+ * JSON License (Modified MIT)
+ *
+ * String.prototype.template(data)
+ * inspired by Terence Parr (StringTemplate) and Krasimir Tsonev (AbsurdJS)
+ *
+ * replaces doc-string tokens with corresponding data 
+ * values, using simplest token set and syntax as possible.
+ *
+ * Function.prototype.template(data)
+ * inspired by @rjrodger's [mstring](https://github.com/rjrodger/mstring)
+ *
+ * an additional helper method for doctrings, returns a `docstring` found by parsing 
+ * contents between /*** and ***\/ delimiters in afunction body
+ *
+ * data argument to each method may be either an Object or an Array.  
+ * empty arguments and primitives are ignored.
+ *
+ * goals of this project
+ * + single methods only
+ * + no ES5 functional programming
+ * + no internal use of Function() constructor
+ * + no formatting
+ * + no default substitution or suppression of empty values
+ * + no if/else logic or branching directives
+ * + no error throwing
+ * + no recursion
+ *
+ * standalone JavaScript methods by hand means
+ * + potential for looping hell
+ * + regex hell ~ test them online with http://www.cuneytyilmaz.com/prog/jrx/ 
+ * + substring crunching ~ http://davidwalsh.name/string-replace-javascript
+ * + small token set places big constraints on looping logic
+ */
 
 typeof String.prototype.template == 'function' || 
 (String.prototype.template = function template(data) {
