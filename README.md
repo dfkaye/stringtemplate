@@ -1,7 +1,7 @@
 stringtemplate
 ==============
 
-[ STILL IN PROGRESS ~ 24 Sept 2014 ]
+[ STILL IN PROGRESS ~ 30 Sept 2014 ]
 
 ## Logic-less Templates in JavaScript
 
@@ -14,7 +14,7 @@ for key-value data.
 [![Build Status](https://travis-ci.org/dfkaye/stringtemplate.png?branch=master)]
 (https://travis-ci.org/dfkaye/stringtemplate)
 
-# Logic-less Templates in JavaScript
+# Logic-less Templates
 
 Terence Parr, [The ANTLR Guy](https://twitter.com/the_antlr_guy) argues that 
 templates are documents with "holes" and should contain no business logic. 
@@ -61,22 +61,102 @@ methods to native/built-in types:
       [mstring](https://github.com/rjrodger/mstring)
   - returns `docstring` found by parsing contents between /*** and ***/ 
     delimiters in function body and concatenates rows of text with newline 
-    character to preserve the docstring's vertical structure ~ left and right 
-    whitespace on each row is trimmed
+    character to preserve the docstring's vertical structure
   - returns empty string if no delimiters found
   - returns docstring.template(data) if `data` argument specified, 
   - otherwise returns the docstring unmodified.   
   - (add note on how to configure uglify to allow comment delimiters while 
       removing others)
-  - removes line comments found within delimiters // so you can annotate lines
+  - removes line comments found within delimiters `// so you can annotate lines`
 
 # Examples
 
-[ todo simple ]
-[ todo array ]
-[ todo complex data ]
-[ todo combining template results ]
+[ still in progress 30 Sept 2014 ]
+
+## values
+
+    var s1 = [
+      '<p>title: $title$</p>',
+      '<p>long name: $person.fullname$</p>'
+    ].join('');
+
+    var d1 = {
+      title: 'value test',
+      person: {
+        fullname: 'my very long name'
+      }
+    };
+
+    var t1 = s1.template(d1);
+
+    var expected = '<p>title: value test</p><p>long name: my very long name</p>';
+
+    console.log(t1 === expected); // => true
+    
+## simple array
+
+    var s2 = [
+      '<ul>',
+        '$[#]$',
+        '<li>$[#]$</li>',
+        '$/[#]$',
+      '</ul>'
+    ].join('');
+
+    var d2 = ['foo', 'bar', 'baz', 'quux'];
+
+    var t2 = s2.template(d2);
+
+    var expected = '<ul><li>foo</li><li>bar</li><li>baz</li><li>quux</li></ul>';
+
+    console.log(t2 === expected); // => true
+    
+## complex data 
+
+    var list = [
+      '<ul>', 
+      '$addresses$', 
+      '<li>$[#].street$</li>', 
+      '<li>$[#].city$, $[#].state$</li>', 
+      '$/addresses$', 
+      '</ul>'
+    ].join('\n');
+
+    var t = list.template({ 
+      addresses: [
+        { street: '123 fourth street', city: 'cityburgh', state: 'aa' },
+        { street: '567 eighth street', city: 'burgville', state: 'bb' },
+        { street: '910 twelfth street', city: 'villetown', state: 'cc' }
+      ]
+    });
+    
+    var expected = [
+      '<ul>',
+      '',
+      '<li>123 fourth street</li>',
+      '<li>cityburgh, aa</li>',
+      '',
+      '<li>567 eighth street</li>',
+      '<li>burgville, bb</li>',
+      '',
+      '<li>910 twelfth street</li>',
+      '<li>villetown, cc</li>',
+      '',
+      '</ul>'
+    ].join('\n');
+
+    console.log(t === expected);  // => true
+  
+## combining template results
+
+  [ todo ]
+  
+## more interesting examples
+
+[ todo function#template ]
+
 [ todo css generator ]
+
 [ todo javascript generator ]
 
 # License

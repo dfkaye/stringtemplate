@@ -336,17 +336,20 @@ test('groups multi-row key-value data by array index', function () {
   
   var expected = [
     '<ul>',
+    '',
     '<li>123 fourth street</li>',
     '<li>cityburgh, aa</li>',
+    '',
     '<li>567 eighth street</li>',
     '<li>burgville, bb</li>',
+    '',
     '<li>910 twelfth street</li>',
     '<li>villetown, cc</li>',
+    '',
     '</ul>'
   ].join('\n');
 
-  // replace blank 'rows' in result
-  assert(t.replace(/\n\n/g, '\n') === expected);
+  assert(t === expected);
 });
 
 
@@ -396,40 +399,135 @@ test('$array$ $[#]$ not replaced when missing $/array$ token', function () {
 });
 
 
+suite('mixed data examples');
 
-/////////////////////////////////////////////////////////////////////////////////////////
+test('processes mixed data map', function () {
+
+// left-aligned to avoid all the whitespace comparisons...
+function temp() {
+/***
+<p>$title$</p>
+<p>$object.main.property$ for $object.main.name$</p>
+<ul>
+$items$
+<li>$[#].name$, $[#].age$</li>
+<li>$[#].address$</li>
+$/items$
+</ul>
+<p>$title2$</p>
+<ul>
+$list$
+<li>$[#]$</li>
+$/list$
+</ul>
+***/
+}
+  
+  var data = {
+    title: 'mixed data test',
+    object: { 
+      main: {
+        property: 'property value at $object.main.property$', 
+        name: 'sarah winchester' 
+      }
+    },
+    items: [ 
+      { 
+        name: 'david', 
+        age: 28, 
+        address: 'home' 
+      }, 
+      { 
+        name: 'divad', 
+        age: 82, 
+        address: 'away' 
+      }
+    ],
+    title2: 'list',
+    list: [ 'foo', 'bar', 'baz', 'quux' ]
+  };
+  
+  var expected = [
+  '',
+    '<p>mixed data test</p>',
+    '<p>property value at $object.main.property$ for sarah winchester</p>',
+    '<ul>',
+    '',
+    '<li>david, 28</li>',
+    '<li>home</li>',
+    '',
+    '<li>divad, 82</li>',
+    '<li>away</li>',
+    '',
+    '</ul>',
+    '<p>list</p>',
+    '<ul>',
+      '',
+      '<li>foo</li>',
+      '',
+      '<li>bar</li>',
+      '',
+      '<li>baz</li>',
+      '',
+      '<li>quux</li>',
+      '',
+    '</ul>',
+    ''
+  ].join('\n');
+
+// console.warn( temp.template(data).split('\n') );
+// console.warn( expected.split('\n') );
+
+  assert(temp.template(data) === expected);
+});
+
+test('template results can be combined via data argument', function () {
+
+  var list = [
+    '<ul>', 
+    '$addresses$', 
+    '</ul>'
+  ].join('\n');
+              
+  var address = [
+    '$[#]$', 
+    '<li>$[#].street$</li>', 
+    '<li>$[#].city$, $[#].state$</li>', 
+    '$/[#]$'
+  ].join('\n');
+  
+  var t = list.template({
+    addresses: address.template([
+      { street: '123 fourth street', city: 'cityburgh', state: 'aa' },
+      { street: '567 eighth street', city: 'burgville', state: 'bb' },
+      { street: '910 twelfth street', city: 'villetown', state: 'cc' }
+    ])
+  });
+  
+  var expected = [
+    '<ul>',
+    '',
+    '<li>123 fourth street</li>',
+    '<li>cityburgh, aa</li>',
+    '',
+    '<li>567 eighth street</li>',
+    '<li>burgville, bb</li>',
+    '',
+    '<li>910 twelfth street</li>',
+    '<li>villetown, cc</li>',
+    '',
+    '</ul>'
+  ].join('\n');
+  
+  assert(t === expected);
+});
+
+
+
+
+/*** function#template ***/
 
 suite('function#template');
-
-// function#template
-// heredoc/multiline string polyfill 
-// originally inspired by @rjrodger's mstring project
-// requires string#template
-typeof Function.prototype.template == 'function' ||
-(Function.prototype.template = function template(data) {
-
-  var fs = String(this);
-  
-  // splitting logic taken from where.js
-  var fnBody = fs.replace(/\s*function[^\(]*[\(][^\)]*[\)][^\{]*{/,'')
-                 .replace(/[\}]$/, '');
-  var table = fnBody.match(/\/(\*){3,3}[^\*]+(\*){3,3}\//);
-  var rows = (table && table[0] || fnBody)
-              .replace(/\/\/[^\n]*/g, '') // remove line comments...
-              .replace(/(\/\*+)*[\r]*(\*+\/)*/g, '') // ...block comments
-              .split('\n'); // and split by newline
-              
-  var r = [];
-  
-  for (var i = 0; i < rows.length; i++) {
-    r.push( rows[i] );
-  }
-
-  // windows vs. linux issue ~ travis borks if \\r not removed
-  r = r.join('\n').replace(/\\r/g, '');
-
-  return (data && typeof data == 'object') ? r.template(data) : r;
-});
 
 test('is method', function () {
   assert(typeof (function(){}).template == 'function');
@@ -565,145 +663,6 @@ test('returns unprocessed docstring when data argument is not an object', functi
   assert(temp.template('data test') === expected);
 });
 
-
-suite('mixed data examples');
-
-test('processes mixed data map', function () {
-
-// left-aligned to avoid all the whitespace comparisons...
-  function temp() {
-/***
-<p>$title$</p>
-<p>$object.main.property$, name: $object.main.name$</p>
-<ul>
-$items$
-<li>$[#].name$, $[#].age$</li>
-<li>$[#].address$</li>
-$/items$
-</ul>
-<p>
-some
-
-more
-</p>
-<ul>
-$list$
-<li>$[#]$</li>
-$/list$
-</ul>
-***/
-  }
-  
-  var data = {
-    title: 'mixed data test',
-    object: { 
-      main: {
-        property: 'this is a property value at $object.main.property$', 
-        name: 'sarah winchester' 
-      }
-    },
-    items: [ 
-      { 
-        name: 'david', 
-        age: 28, 
-        address: 'home' 
-      }, 
-      { 
-        name: 'divad', 
-        age: 82, 
-        address: 'away' 
-      }
-    ],
-    list: [ 'a', 'b', 'c' ]
-  };
-  
-  var expected = [
-  '',
-    '<p>mixed data test</p>',
-    '<p>this is a property value at $object.main.property$, name: sarah winchester</p>',
-    '<ul>',
-    '',
-
-    '<li>david, 28</li>',
-    '<li>home</li>',
-    '',
-
-    '<li>divad, 82</li>',
-    '<li>away</li>',
-    '',
-    
-    '</ul>',
-    '<p>',
-    'some',
-    '',
-    'more',
-    '</p>',
-    '<ul>',
-    '',
-
-    '<li>a</li>',
-    '',
-
-    '<li>b</li>',
-    '',
-
-    '<li>c</li>',
-    '',
-
-    '</ul>',
-    ''
-  ].join('\n');
-
-// console.warn( temp.template(data).split('\n') );
-// console.warn( expected.split('\n') );
-
-  assert(temp.template(data) === expected);
-});
-
-test('template results can be combined via data argument', function () {
-
-  var list = [
-    '<ul>', 
-    '$addresses$', 
-    '</ul>'
-  ].join('\n');
-              
-  var address = [
-    '$[#]$', 
-    '<li>$[#].street$</li>', 
-    '<li>$[#].city$, $[#].state$</li>', 
-    '$/[#]$'
-  ].join('\n');
-  
-  var t = list.template({
-    addresses: address.template([
-      { street: '123 fourth street', city: 'cityburgh', state: 'aa' },
-      { street: '567 eighth street', city: 'burgville', state: 'bb' },
-      { street: '910 twelfth street', city: 'villetown', state: 'cc' }
-    ])
-  });
-  
-  var expected = [
-    '<ul>',
-    '',
-
-    '<li>123 fourth street</li>',
-    '<li>cityburgh, aa</li>',
-    '',
-
-    '<li>567 eighth street</li>',
-    '<li>burgville, bb</li>',
-    '',
-
-    '<li>910 twelfth street</li>',
-    '<li>villetown, cc</li>',
-    '',
-
-    '</ul>'
-  ].join('\n');
-  
-  assert(t === expected);
-});
 
 /*
 

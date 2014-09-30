@@ -1,4 +1,5 @@
-// typeof String.prototype.template != 'function' || 
+
+typeof String.prototype.template == 'function' || 
 (String.prototype.template = function template(data) {
 
   var source = this.toString();
@@ -6,15 +7,18 @@
   // add fail fast early return here ~ maybe
   
   var endTokens = source.match(/\$\/[^\$^\s]+\$/g) || [];
-  var startTokens = source.match(/\$[^\#^\$^\s]+\$/g) || [];
   var tags = [];
 
+  var startTokens = source.match(/\$[^\#^\$^\s]+\$/g) || [];
+  var visited = {};
+  
   var endToken, endIndex, startToken, startIndex, nextIndex, tag, body;
   var i, innerTags, node, j;
   var path, p, reValueToken;
   
   /*
-   * returns string derived from replacing node data in tag data
+   * utility method returns string derived from replacing node data in tag body.
+   * return the original tag's tag if no transformation performed on tag body.
    */
   function transform(tag, node) {
   
@@ -30,21 +34,18 @@
       
       if (hash) {
       
-        if (typeof node[k] != 'object') {
-        
-          // replace primitives directly
-          content = content.replace(hash[0], node[k]);
-          
-        } else {
+        if (typeof node[k] == 'object') {
         
           values = [];
           
           for (var n in node[k]) {
-          
             values.push(body.replace(hash[0], node[k][n]));
           }
           
           content = values.join('');
+          
+        } else {
+          content = content.replace(hash[0], node[k]);
         }
       }
       
@@ -54,21 +55,17 @@
         
           key = hashKey[i].split('.')[1].replace('$', '');
           
-          if ({}.toString.call(node[k][key]) == '[object Array]') {
-            
-            // 30 Sept 2014
+          if ({}.toString.call(node[k][key]) == '[object Array]') { 
             
             values = [];
             
-            for (var j in node[k][key]) {
-            
+            for (var j in node[k][key]) { // 30 Sept 2014
               values.push(body.replace(hashKey[i], node[k][key][j]));
             }
             
             content = values.join('');
 
           } else {
-          
             content = content.replace(hashKey[i], node[k][key]);
           }
         }          
@@ -82,6 +79,11 @@
     return contents.join('') || tag.tag;
   } // end transform()
   
+  /*
+   * main process ~ makes two passes through end tokens, if any, to map and 
+   * replace block tags ~ make a final pass through tokens without matching end
+   * tokens to replace values directly.
+   */
   
   // pass #1 map blocks (matching end and start tokens)
   
@@ -140,7 +142,6 @@
       tag.target = tag.body.replace('$[' + j + ']$', transform(tags[j], node));
       
     } else {
-      
       tag.target = transform(tag, node);
     }
     
@@ -155,23 +156,62 @@
   while (i--) {
   
     startToken = startTokens[i];
-    endToken = startToken.replace('$', '$/').replace(/\$/g, '\\$');
     
-    if (!RegExp(endToken, 'gm').test(source)) {
+    if (!visited[startToken]) {
+    
+      visited[startToken] = startToken;
+      endToken = startToken.replace('$', '$/').replace(/\$/g, '\\$');
       
-      node = data;      
-      path = startToken.replace(/\$/g, '').split('.');
-      p = 0;
+      if (!RegExp(endToken, 'gm').test(source)) {
+        
+        node = data;      
+        path = startToken.replace(/\$/g, '').split('.');
+        p = 0;
 
-      while (node && p < path.length) {
-        node = node[path[p++]];
+        while (node && p < path.length) {
+          node = node[path[p++]];
+        }
+        
+        !node || (reValueToken = RegExp(startToken.replace(/\$/g, '\\$'), 'gm'),
+          source = source.replace(reValueToken, node)
+        );
       }
-      
-      !node || (reValueToken = RegExp(startToken.replace(/\$/g, '\\$'), 'gm'),
-        source = source.replace(reValueToken, node)
-      );
     }
   }
       
   return source;
+});
+
+////////////////////////////////////////////////////////////////////////////////
+
+/*
+ * function#template
+ * heredoc/multiline string polyfill 
+ * originally inspired by @rjrodger's mstring project
+ * requires string#template
+ */
+typeof Function.prototype.template == 'function' ||
+(Function.prototype.template = function template(data) {
+
+  var fs = String(this);
+  
+  // splitting logic taken from where.js
+  var fnBody = fs.replace(/\s*function[^\(]*[\(][^\)]*[\)][^\{]*{/,'')
+                 .replace(/[\}]$/, '');
+  var table = fnBody.match(/\/(\*){3,3}[^\*]+(\*){3,3}\//);
+  var rows = (table && table[0] || fnBody)
+              .replace(/\/\/[^\n]*/g, '') // remove line comments...
+              .replace(/(\/\*+)*[\r]*(\*+\/)*/g, '') // ...block comments
+              .split('\n'); // and split by newline
+              
+  var r = [];
+  
+  for (var i = 0; i < rows.length; i++) {
+    r.push( rows[i] );
+  }
+
+  // windows vs. linux issue ~ travis borks if \\r not removed
+  r = r.join('\n').replace(/\\r/g, '');
+
+  return (data && typeof data == 'object') ? r.template(data) : r;
 });
