@@ -5,7 +5,7 @@ stringtemplate
 
 You may view a presentation about this project on rawgit at 
 <a href="https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html"
-  target="_blank">
+  target="_new">
     https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html</a>
 
 ## Logic-less Templates in JavaScript
