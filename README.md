@@ -3,7 +3,10 @@ stringtemplate
 
 [ NOT STABLE ~ PROJECT UNDER DEVELOPMENT ~ DOCS ARE INACCURATE ~ 9 OCT 2014 ]
 
-You may view a presentation about this project on rawgit at <a href=""></a>
+You may view a presentation about this project on rawgit at 
+<a href="https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html"
+  target="_blank">
+    https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html</a>
 
 ## Logic-less Templates in JavaScript
 
