@@ -1,3 +1,19 @@
+// Sept  4-5, 2014 ~ aim at zero-recursion
+// Sept  6 ~ still in progress but most array drilldown is done
+// Sept  9 ~ cleaned up array v placeholder detection and drilldown
+// Sept 16 ~ finally ~ looks like complex data mapping is solved...
+// Sept 18 ~ get out of iterating by rows of strings
+// Sept 20 ~ ugh ~ new version started
+// Sept 23 ~ nested array case solved 23 SEPT 2014 12:04 - 12:20 PM PDT
+// Sept 24 ~ some renaming and comments
+// Sept 25 ~ intro some functional programming
+// Sept 26 ~ remove functional; use reverse-while on end tags w/content aliasing
+// Sept 27 ~ nested object-array tests working
+// Sept 29 ~ arrays and nested arrays working
+// Sept 30 ~ fixed array of objects with nested arrays
+// Oct 6-7 ~ changed token syntax & started over
+// Oct 9   ~ SUCCESS ~ ALL TESTS REFACTORED AND PASSING (call it version 8)
+
 /*
  * stringtemplate
  *

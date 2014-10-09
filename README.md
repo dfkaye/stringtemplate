@@ -1,14 +1,16 @@
 stringtemplate
 ==============
 
-[ STILL IN PROGRESS ~ 30 Sept 2014 ]
+[ NOT STABLE ~ PROJECT UNDER DEVELOPMENT ~ DOCS ARE INACCURATE ~ 9 OCT 2014 ]
+
+You may view a presentation about this project on rawgit at <a href=""></a>
 
 ## Logic-less Templates in JavaScript
 
 `stringtemplate` adds a `template()` method to `String.prototype` and 
 `Function.prototype` that act as a batch string#replace, using `$token$` 
 placeholders for values/objects and `$objectOrArray$` and `$/objectOrArray$` 
-tokens to demarcate iterable data with `$[#]$` for array indexes or `$[#].key$` 
+tokens to demarcate iterable data with `$.$` for array indexes or `$.key$` 
 for key-value data. 
 
 [![Build Status](https://travis-ci.org/dfkaye/stringtemplate.png?branch=master)]
@@ -179,7 +181,7 @@ Tests are currently run with `mocha` using the `assert`, the `qunit` ui and the
 Browser tests run fine with `testem`, but mocha (on node) and testem do not play 
 as well together on a Windows laptop (like mine).  YMMV.
 
-## rawgithub
+## rawgit
 
 <a href='https://rawgit.com/dfkaye/stringtemplate/master/test/mocha/browser-suite.html' 
-   target='_blank'>run browser-suite</a> on rawgithub (opens new tab|window)
+   target='_blank'>run browser-suite</a> on rawgit (opens new tab|window)
