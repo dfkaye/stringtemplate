@@ -7,7 +7,7 @@ You may view a presentation about this project on rawgit at
 <a href='https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html'
   target='_blank'>https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html</a>
 
-## Logic-less Templates in JavaScript
+## Minimalist Logic-less Templates in JavaScript
 
 `stringtemplate` adds a `template()` method to `String.prototype` and 
 `Function.prototype` that act as a batch string#replace, using `$token$` 
@@ -41,7 +41,7 @@ for C#, Python).
 In *this* project, `stringtemplate` is a JavaScript shim that adds the following 
 methods to native/built-in types:
 
-[ IN PROGRESS - detail, examples, messages instead of errors ]
+[ NOT STABLE ~ TOKENS NEED RE-THINKING ]
 
 + `String.prototype.template(data)`
 
@@ -54,10 +54,15 @@ methods to native/built-in types:
     
   - $placeholder$ ~ use value found at data.placeholder
   - $path.name$ ~ use value found at data.path.name
-  - $/path.name$ ~ marks the end of an iterable data ~ must have a matching 
-      $path.name$ token
-  - $[#]$ ~ inside an iteration, use object value at each index [0, 1, 2...]
-  - $[#].key$ ~ inside an iteration, use value found at [index].name
+  - $path.name#$ ~ marks the end of an iterable data ~ must have a matching 
+  - $/path.name#$ ~ marks the end of an iterable data ~ must have a matching 
+      $path.name#$ token
+  - $.$ ~ inside an iteration, use object value at each index [0, 1, 2...]
+  - $.key$ ~ inside an iteration, use value found at [index].name
+  - $.#$ ~ indexed collection inside an iteration
+  - $/.#$ ~ endindexed collection inside an iteration
+  - $.key#$ ~ key-value collection inside an iteration  
+  - $/.key#$ ~ end key-value collection inside an iteration
   
 + `Function.prototype.template(data)`
 
@@ -75,7 +80,7 @@ methods to native/built-in types:
 
 # Examples
 
-[ still in progress 30 Sept 2014 ]
+[ NOT STABLE ~ EXAMPLES ARE INACCURATE ~ 10 OCT 2014 ]
 
 ## values
 

@@ -1,7 +1,7 @@
 {
   "name": "stringtemplate",
-  "version": "0.0.3",
-  "description": "Logic-less Templates in JavaScript",
+  "version": "0.0.4",
+  "description": "Minimalist Logic-less Templates in JavaScript",
   "main": "stringtemplate.js",
   "devDependencies": {
     "mocha": ">= 1.7"

@@ -42,26 +42,23 @@ typeof String.prototype.template == 'function' ||
 
   var source = this.toString();
   var tokens = source.match(/\$\.?[^\/^\$^\s]+\$/g);
-  
-  var handleError = typeof fn == 'function' && fn || 
-  (handleError = function (msg) {
-    !console || (console.log(msg));
+  var errors = [': halted'];
+
+  var handleMessage = typeof fn == 'function' && fn || 
+  (handleMessage = function (errors) {
+    !console || (console.warn('** stringtemplate' + errors.join(': ')));
   });
-  
-  var msg = '';
-  
+    
   // fail fast, return early
   
-  data && typeof data =='object' || (msg += ': data must be an object');
-  tokens || (msg += ': no tokens in source string');
-  fn || typeof fn == 'function' && (msg += ': fn must be a function');
+  data && typeof data == 'object' || (errors.push(': data must be an object'));
+  tokens || (errors.push(': no tokens in source string'));
+  !fn || fn && typeof fn == 'function' && (errors.push(': fn must be a function'));
   
-  if (msg.length > 0) {
-    handleError('template not transformed' + msg);
+  if (errors.length > 1) {
+    handleMessage(errors);
     return source;
   }
-  
-  msg = 'transformation halted';
   
   //
   
@@ -96,6 +93,7 @@ typeof String.prototype.template == 'function' ||
     var contents = [];
 
     for (var k in context) {
+    
       contents.push(source.toString().replace(token, context[k]));
     }
     
@@ -118,6 +116,7 @@ typeof String.prototype.template == 'function' ||
       content = source.toString();
       
       for (var i = 0; i < tokens.length; ++i) {
+      
         key = tokens[i].replace(/[\$\.]/g, '');
         content = content.replace(tokens[i], context[k][key])
       }
@@ -147,7 +146,8 @@ typeof String.prototype.template == 'function' ||
     // handle empty token set - due to bad markup most likely
     
     if (!tokens) {
-      handleError(msg + ': no content tokens found in ' + token);
+      errors.push(': no content tokens found in ' + token)
+      handleMessage(errors);
       return source;
     }
     
@@ -174,6 +174,7 @@ typeof String.prototype.template == 'function' ||
 
       if (depth === 0 && start > 0 && end > 0) {
       
+        // TODO REFACTOR ~ EXTRACT TO METHOD
         // resolve tag
         // start, end, text
         
@@ -193,7 +194,7 @@ typeof String.prototype.template == 'function' ||
           if (bodyTokens[0] === '$.#$') {
           
             console.log('handle nested array block');
-            console.warn(st === bodyTokens[0]);
+            // console.warn(st === bodyTokens[0]);
             
             var contents = [];
             
@@ -207,10 +208,12 @@ typeof String.prototype.template == 'function' ||
 
             console.log('handle nested object block');
 
-            var contents = [];
+            // var contents = [];
             
             if ({}.toString.call(context) == '[object Array]') {
             
+              var contents = [];
+              
               for (var k in context) {
                 contents.push(handleBlock(body, context[k], st));
               }
@@ -282,18 +285,25 @@ typeof String.prototype.template == 'function' ||
   // handle all tokens
 
   return (function processTokens(source, data, tokens) {
-
+  
+    /*
+     * check index for each token because source is the state and (potentially) 
+     * modified on each iteration
+     */
+     
     var token, name;
     
     // replace inline tokens first
     
     if (tokens) {
+    
       for (var i = 0; i < tokens.length; ++i) {
         
         token = tokens[i];
 
-        if (token != '$.$' && ~source.indexOf(token)) { // alternation fix/found
+        if (!token.match(/\#\$/) && ~source.indexOf(token)) { // alternation fix/found '$.$'
           if (!~source.indexOf(token.replace('$', '$/'))) { // not found
+          
             source = replaceValue(source, data, token);
           }
         }
@@ -304,19 +314,17 @@ typeof String.prototype.template == 'function' ||
     
     tokens = source.match(/\$[^\/^\$^\s]+\$/g); 
     
-    if (tokens) {      
+    if (tokens) {
+    
       for (var i = 0; i < tokens.length; ++i) {
       
         token = tokens[i];
         name = token.replace(/[\$\#]/g, '');
 
-        if (data[name] || token == '$.#$') { // alternation fix
-          /*
-           * check index again because source is the state and is potentially 
-           * modified on each token iteration
-           */
-          if (~source.indexOf(token)) { // found
-              source = handleBlock(source, data, token);
+        if (data[name] || token.match(/\$\.[^\$^\s]?\#\$/) ) { // alternation fix '$.#$'           
+          if (~source.indexOf(token) && ~source.indexOf(token.replace('$', '$/'))) { // found
+
+            source = handleBlock(source, data, token);
           }          
         }
       }

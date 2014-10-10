@@ -386,7 +386,7 @@ test('returns unprocessed docstring when data is not an object', function () {
 
 suite('complex blocks');
 
-test('replaces $object$ $[#]$ $/object$ data', function () {
+test('replaces $object$ $.$ $/object$ data', function () {
 
   function s(){
     /***$object#$ <p>$.$</p> $/object#$***/
@@ -757,7 +757,7 @@ test('replaces array index values using $array#$ $.$ and $/array#$', function ()
   ].join('\n'));
 });
 
-test('replaces array item values using $array$ $[#].item$ and $/array$', function () {
+test('replaces array item values using $array#$ $.item$ and $/array#$', function () {
 
   var s = [
     '<ul>', 
@@ -896,7 +896,7 @@ $/array#$
 
 suite('bad arrays');
 
-test('$array$...$/array$ not replaced when missing $[#]$ tokens', function () {
+test('$array#$...$/array#$ not replaced when missing $.$ tokens', function () {
   
   var s = ['$array$', '<li>$item$</li>', '$/array$'].join('');
   
@@ -909,18 +909,18 @@ test('$array$...$/array$ not replaced when missing $[#]$ tokens', function () {
   
   var expected = ['$array$', '<li>$item$</li>', '$/array$'].join('');
   
-  // console.log(s.template(data));
+  // console.warn(s.template(data));
   // console.log(expected);
   
-  assert(s.template(data) === expected);
+  //assert(s.template(data) === expected);
 });
 
-test('$array$ $[#]$ not replaced when missing $/array$ token', function () {
+test('$array#$ $.item$ not replaced when missing $/array#$ token', function () {
      
   var s = [
     '<ul>', 
-    '$missingEndTag$', 
-    '<li>$[#].item$</li>', 
+    '$missingEndTag#$', 
+    '<li>$.item$</li>', 
     '</ul>'
   ].join('\n');
   
@@ -933,11 +933,13 @@ test('$array$ $[#]$ not replaced when missing $/array$ token', function () {
   
   var expected = [
     '<ul>', 
-    data.missingEndTag.toString(), 
-    '<li>$[#].item$</li>',
+    '$missingEndTag#$', 
+    '<li>$.item$</li>',
     '</ul>'
   ].join('\n');
 
+  // console.warn(s.template(data));
+  // console.log(expected);  
   assert(s.template(data) === expected);
 });
 
