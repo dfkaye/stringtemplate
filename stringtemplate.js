@@ -38,24 +38,24 @@
  */
 
 typeof String.prototype.template == 'function' || 
-(String.prototype.template = function template(data, fn) {
+(String.prototype.template = function template(data) {
 
   var source = this.toString();
   var tokens = source.match(/\$\.?[^\/^\$^\s]+\$/g);
-  var errors = [': halted'];
+  var errors = ['error'];
 
-  var handleMessage = typeof fn == 'function' && fn || 
-  (handleMessage = function (errors) {
-    !console || (console.warn('** stringtemplate' + errors.join(': ')));
-  });
-    
-  // fail fast, return early
-  
-  data && typeof data == 'object' || (errors.push(': data must be an object'));
-  tokens || (errors.push(': no tokens in source string'));
-  !fn || fn && typeof fn == 'function' && (errors.push(': fn must be a function'));
+  function handleMessage(messages) {
+    !console || ((console['warn'] || console['log'])('** stringtemplate: ' + 
+                                                     messages.join(': ')));
+  };
+
+  data && typeof data == 'object' || (errors.push('data must be an object'));
+  tokens || (errors.push('no tokens in source string'));
   
   if (errors.length > 1) {
+
+    // fail fast, return early
+  
     handleMessage(errors);
     return source;
   }
@@ -64,7 +64,7 @@ typeof String.prototype.template == 'function' ||
   
   function replaceValue(source, data, token) {
   
-    console.log('replaceValue for ' + token);
+    // console.log('replaceValue for ' + token);
    
     var name = token.replace(/\$\./, '').replace(/\$/g, '');
     var path = name.split('.');
@@ -75,6 +75,8 @@ typeof String.prototype.template == 'function' ||
     while (context && p < path.length) {
       context = context[path[p++]];
     }
+    
+    // handleMessage for no context
     
     !context || (
       reValueToken = RegExp(token.replace(/\$/g, '\\$'), 'gm'),
@@ -88,15 +90,16 @@ typeof String.prototype.template == 'function' ||
   
   function replaceCollection(source, context, token) {
     
-    console.log('replaceCollection');
+    // console.log('replaceCollection');
 
     var contents = [];
 
     for (var k in context) {
-    
       contents.push(source.toString().replace(token, context[k]));
     }
     
+    // handleMessage for no transform on token
+
     return contents.join('') || source;
   }
   
@@ -104,15 +107,14 @@ typeof String.prototype.template == 'function' ||
   
   function replaceCollectionKeys(source, context, tokens) {
   
-    console.log('replaceCollectionKeys');
+    // console.log('replaceCollectionKeys');
 
     var contents = [];
     var keys = {};
-    var content, item, key;
+    var content, key;
     
     for (var k in context) {
     
-      item = context[k];
       content = source.toString();
       
       for (var i = 0; i < tokens.length; ++i) {
@@ -123,38 +125,121 @@ typeof String.prototype.template == 'function' ||
       
       contents.push(content);
     }
+
+    // handleMessage for no transform on token
     
     return contents.join('');
   }
   
   // LARGE METHOD
+
+  function resolveTagBody(source, context, tag, body) {
+
+    // console.log('resolveTagBody');
+   
+    var content = body.toString();
+    var bodyTokens = body.match(/\$\.([^\$^\s]+)?\$/g);
+    var contents = [];
+    var firstToken;
+
+    if (/\#\$/.test(body)) {
+
+      firstToken = /\$\.?[^\$^\s]+\$/.exec(body)[0];
+
+      if (firstToken === '$.#$') {
+      
+        // console.log('handle nested array block');
+        
+        for (var k in context) {
+          contents.push(handleBlock(body, context[k], firstToken));
+        }
+        
+        content = contents.join('');
+        
+      } else {    
+
+        // console.log('handle nested object block');
+        
+        if ({}.toString.call(context) == '[object Array]') {
+                  
+          for (var k in context) {
+            contents.push(handleBlock(body, context[k], firstToken));
+          }
+          
+          content = contents.join('');
+
+        } else {
+          content = handleBlock(body, context, firstToken);
+        }
+      }
+      
+      // handleMessage for no transform on firstToken
+
+      if (content !== body) {
+        source = source.replace(tag, content);
+      }
+      
+    } else {
+
+      // console.log('replace values');
+
+      firstToken = bodyTokens[0];
+      
+      if (firstToken == '$.$') {
+
+        content = replaceCollection(content, context, firstToken);
+
+      } else {
+      
+        if ({}.toString.call(context) == '[object Array]') {
+        
+          content = replaceCollectionKeys(content, context, bodyTokens);
+          
+        } else {
+        
+          for (var i = 0; i < bodyTokens.length; ++i) {
+            content = replaceValue(content, context, bodyTokens[i]);
+          }
+        }
+      }
+
+      // handleMessage for no transform on firstToken
+      
+      if (content !== body) {
+        if ({}.toString.call(context) == '[object Array]') {
+          source = source.replace(tag, content);
+        } else {
+          source = content;
+        }
+      }
+    }
+    
+    return source;
+  }
+  
+  //
   
   function handleBlock(source, data, token) {
     
-    console.log('handleBlock for ' + token);
-
-    var context = data;
-    var name = token.replace(/[\$\.\#]/g, '');
-
-    // set default context here, resolve it down below if we're in an array    
-    !name || (context = context[name]);
-    
-    var endToken = token.replace('$', '$/');
-    var text = source.substring(source.indexOf(token));
-    var tokens = text.match(/\$\.?[^\$^\s]+\#\$/g);
+    // console.log('handleBlock for ' + token);
+       
+    var block = source.substring(source.indexOf(token));
+    var tokens = block.match(/\$\.?[^\$^\s]+\#\$/g);
     
     // handle empty token set - due to bad markup most likely
     
     if (!tokens) {
-      errors.push(': no content tokens found in ' + token)
-      handleMessage(errors);
+    
+      handleMessage(['halted', 'no content tokens found in ' + block]);
+      
       return source;
     }
     
+    var endToken = token.replace('$', '$/');    
     var depth = 0;
     var start = 0;
     var end = 0;
-    var st, tag, body, content, bodyTokens;
+    var context, name, tag, body;
 
     for (var i = 0; i < tokens.length; ++i) {
       
@@ -163,118 +248,24 @@ typeof String.prototype.template == 'function' ||
         depth -= 1;
         
         if (endToken == '$/.#$' || !end) {
-          end = text.indexOf(endToken, end + 1);
+          end = block.indexOf(endToken, end + 1);
         }
         
       } else if (/\$[^\$^\/^\s]+\#\$/.test(tokens[i])) {
-      
         depth += 1;
         start || (start = token.length);
       }
 
       if (depth === 0 && start > 0 && end > 0) {
-      
-        // TODO REFACTOR ~ EXTRACT TO METHOD
-        // resolve tag
-        // start, end, text
         
-        tag = text.substring(0, end + endToken.length);
+        context = data;
+        name = token.replace(/[\$\.\#]/g, '');
+        !name || (context = context[name]);
+        
+        tag = block.substring(0, end + endToken.length);
         body = tag.substring(start, end);
-        content = body.toString();
-        bodyTokens = body.match(/\$\.([^\$^\s]+)?\$/g);
+        source = resolveTagBody(source, context, tag, body);
         
-        // tag, body, content, bodyTokens, context, source
-        
-        if (/\#\$/.test(body)) {
-        
-          console.log(name + ' is nested');
-
-          st = /\$\.?[^\$^\s]+\$/.exec(body)[0];
-
-          if (bodyTokens[0] === '$.#$') {
-          
-            console.log('handle nested array block');
-            // console.warn(st === bodyTokens[0]);
-            
-            var contents = [];
-            
-            for (var k in context) {
-              contents.push(handleBlock(body, context[k], bodyTokens[0]));
-            }
-            
-            content = contents.join('');
-            
-          } else {    
-
-            console.log('handle nested object block');
-
-            // var contents = [];
-            
-            if ({}.toString.call(context) == '[object Array]') {
-            
-              var contents = [];
-              
-              for (var k in context) {
-                contents.push(handleBlock(body, context[k], st));
-              }
-              
-              content = contents.join('');
-
-            } else {
-            
-              content = handleBlock(body, context, st);
-            }
-          }
-          
-          if (content !== body) {
-            source = source.replace(tag, content);
-          }
-          
-        } else {
-
-          console.log('replace values');
-
-          if ({}.toString.call(context) == '[object Array]') {
-          
-            console.log('replace array values');
-           
-            if (bodyTokens[0] == '$.$') {
-
-              content = replaceCollection(content, context, bodyTokens[0]);
-
-            } else {
-              
-              content = replaceCollectionKeys(content, context, bodyTokens);
-            }
-          
-            if (content !== body) {
-              source = source.replace(tag, content);
-            }
-
-          } else {
-
-            console.log('*** handle object as map ***');
-
-            if (bodyTokens[0] == '$.$') {
-            
-              content = replaceCollection(content, context, bodyTokens[0]);
-              
-            } else {
-            
-              // replace each value in the content string
-              
-              for (var j = 0; j < bodyTokens.length; ++j) {
-              
-                content = replaceValue(content, context, bodyTokens[j]);
-              }
-            }
-            
-            if (content !== body) {
-              source = content;
-            }
-          }
-        }
-
         break;
       }
     }
@@ -295,37 +286,32 @@ typeof String.prototype.template == 'function' ||
     
     // replace inline tokens first
     
-    if (tokens) {
-    
-      for (var i = 0; i < tokens.length; ++i) {
-        
-        token = tokens[i];
+    for (var i = 0; i < tokens.length; ++i) {
+      
+      token = tokens[i];
 
-        if (!token.match(/\#\$/) && ~source.indexOf(token)) { // alternation fix/found '$.$'
-          if (!~source.indexOf(token.replace('$', '$/'))) { // not found
-          
-            source = replaceValue(source, data, token);
-          }
-        }
+      if (!token.match(/\#\$/) && ~source.indexOf(token) && // alternation fix/found '$.$'
+          !~source.indexOf(token.replace('$', '$/'))) { // not found
+        
+        source = replaceValue(source, data, token);
       }
     }
     
-    // handle content tokens
+    // handle collection tokens
     
-    tokens = source.match(/\$[^\/^\$^\s]+\$/g); 
-    
-    if (tokens) {
+    //tokens = source.match(/\$[^\/^\$^\s]+\$/g); 
+    // assignment!
+    if (tokens = source.match(/\$[^\/^\$^\s]+\$/g)) {
     
       for (var i = 0; i < tokens.length; ++i) {
       
         token = tokens[i];
         name = token.replace(/[\$\#]/g, '');
 
-        if (data[name] || token.match(/\$\.[^\$^\s]?\#\$/) ) { // alternation fix '$.#$'           
-          if (~source.indexOf(token) && ~source.indexOf(token.replace('$', '$/'))) { // found
+        if (name in data || token.match(/\$\.[^\$^\s]?\#\$/) && // alternation fix '$.#$'           
+            ~source.indexOf(token) && ~source.indexOf(token.replace('$', '$/'))) { // found
 
-            source = handleBlock(source, data, token);
-          }          
+          source = handleBlock(source, data, token);
         }
       }
     }
@@ -346,7 +332,7 @@ typeof String.prototype.template == 'function' ||
 typeof Function.prototype.template == 'function' ||
 (Function.prototype.template = function template(data) {
 
-  var fs = String(this);
+  var fs = this.toString();
   
   // splitting logic taken from where.js
   var fnBody = fs.replace(/\s*function[^\(]*[\(][^\)]*[\)][^\{]*{/,'')

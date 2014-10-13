@@ -24,7 +24,7 @@ test('returns self.toString() when argument is not an object', function () {
   assert(s.template(true) === s);
 });
 
-test('returns self.toString() when argument is an empty object or array', function () {
+test('returns self.toString() when data is empty object or array', function () {
 
   var s = '';
   
@@ -32,11 +32,6 @@ test('returns self.toString() when argument is an empty object or array', functi
   assert(s.template({}) === s);
   assert(s.template([]) === s);  
 });
-
-
-suite('error handler');
-
-test('todo');
 
 
 suite('inline values');
@@ -345,7 +340,7 @@ test('removes line comments found within /*** docstring ***/', function () {
   assert(-1 === temp.template().indexOf('I am a comment'));
 });
 
-test('calls string#template on docstring when data argument is specified', function () {
+test('calls docstring#template when data argument is specified', function () {
 
   function temp() {
   /***
@@ -1069,7 +1064,7 @@ test('template results can be combined via data argument', function () {
   assert(t === expected);
 });
 
-/*
+test('css template example', function () {
 
   // css
   
@@ -1080,32 +1075,46 @@ test('template results can be combined via data argument', function () {
   var r = rule.template([ {prop: 'color', value: '#345'} ])
   var rs = ruleset.template({ ruleset: r });
   var s = selector.template({selector: 'a > b > c'}).template(rs);
-  console.log(s == 'a > b > c{ color: #345; }');
+  //console.log(s == 'a > b > c{ color: #345; }');
 
   // heredoc css
 
   function cssruleset() {
-    /\***
+  /***
     $selector$ { 
       $declarations$
     }
-    ***\/
+  ***/
   }
 
   function declarations() {
-    /\***
-     basic: 10px;
-     color: $color$;
-     background-color: $bgcolor$;
-    ***\/
+  /***
+      basic: 10px;
+      color: $color$;
+      background-color: $bgcolor$;
+  ***/
   }
 
-  cssruleset.template({
+  var css = cssruleset.template({
     selector: ".class ~ whatever::after",
     declarations: declarations.template({
       color: '#345',
       bgcolor: 'rgb(34, 0, 53)'
     })
   });
-
-*/
+  
+  var expected = (function () {
+  /***
+    .class ~ whatever::after { 
+      
+      basic: 10px;
+      color: #345;
+      background-color: rgb(34, 0, 53);
+  
+    }
+  ***/
+  }).template();
+ // console.warn(css.split('\n'));
+ // console.warn(expected.split('\n'));
+  assert(css === expected);
+});
