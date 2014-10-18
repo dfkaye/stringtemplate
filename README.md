@@ -1,7 +1,10 @@
 stringtemplate
 ==============
 
-[ NOT STABLE ~ PROJECT UNDER DEVELOPMENT ~ DOCS ARE INACCURATE ~ 9 OCT 2014 ]
+[ v0.0.10 ] [![Build Status](https://travis-ci.org/dfkaye/stringtemplate.png?branch=master)]
+(https://travis-ci.org/dfkaye/stringtemplate)
+
+[ NOT STABLE ~ TOKEN SET STILL IN REVIEW ~ DOCS ARE INACCURATE ~ 18 OCT 2014 ]
 
 You may view a presentation about this project on rawgit at 
 <a href='https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html'
@@ -11,12 +14,12 @@ You may view a presentation about this project on rawgit at
 
 `stringtemplate` adds a `template()` method to `String.prototype` and 
 `Function.prototype` that act as a batch string#replace, using `$token$` 
-placeholders for values/objects and `$objectOrArray$` and `$/objectOrArray$` 
+placeholders for values/objects and `$#objectOrArray$` and `$/objectOrArray$` 
 tokens to demarcate iterable data with `$.$` for array indexes or `$.key$` 
 for key-value data. 
 
-[![Build Status](https://travis-ci.org/dfkaye/stringtemplate.png?branch=master)]
-(https://travis-ci.org/dfkaye/stringtemplate)
+[ TODO ~ EXPAND THIS DESCRIPTION ]
+
 
 # Logic-less Templates
 
@@ -41,7 +44,7 @@ for C#, Python).
 In *this* project, `stringtemplate` is a JavaScript shim that adds the following 
 methods to native/built-in types:
 
-[ NOT STABLE ~ TOKENS NEED RE-THINKING ]
+[ NOT STABLE ~ TOKEN SET RE-DONE BUT STILL IN REVIEW ~ 18 OCT 2014 ]
 
 + `String.prototype.template(data)`
 
@@ -54,15 +57,16 @@ methods to native/built-in types:
     
   - $placeholder$ ~ use value found at data.placeholder
   - $path.name$ ~ use value found at data.path.name
-  - $path.name#$ ~ marks the end of an iterable data ~ must have a matching 
-  - $/path.name#$ ~ marks the end of an iterable data ~ must have a matching 
-      $path.name#$ token
+  - $#path.name$ ~ marks the start of an iteration ~ must have a matching end 
+      token, $/path.name$
+  - $/path.name$ ~ marks the end of an iteration ~ must have a matching start
+      $#path.name$ token
   - $.$ ~ inside an iteration, use object value at each index [0, 1, 2...]
   - $.key$ ~ inside an iteration, use value found at [index].name
-  - $.#$ ~ indexed collection inside an iteration
-  - $/.#$ ~ endindexed collection inside an iteration
-  - $.key#$ ~ key-value collection inside an iteration  
-  - $/.key#$ ~ end key-value collection inside an iteration
+  - $#.$ ~ start of a collection inside an iteration
+  - $/.$ ~ end of a collection inside an iteration
+  - $#.key$ ~ key-value collection inside an iteration  
+  - $/.key$ ~ end key-value collection inside an iteration
   
 + `Function.prototype.template(data)`
 
@@ -74,41 +78,41 @@ methods to native/built-in types:
   - returns empty string if no delimiters found
   - returns docstring.template(data) if `data` argument specified, 
   - otherwise returns the docstring unmodified.   
-  - (add note on how to configure uglify to allow comment delimiters while 
+  - __TODO__ (add note on how to configure uglify to allow comment delimiters while 
       removing others)
-  - removes line comments found within delimiters `// so you can annotate lines`
+  - <del>removes line comments found within delimiters `// so you can annotate lines` </del>
 
 # Examples
 
-[ NOT STABLE ~ EXAMPLES ARE INACCURATE ~ 10 OCT 2014 ]
+[ STILL IN PROGRESS ~ 18 OCT 2014 ]
 
 ## values
 
-    var s1 = [
+    var s = [
       '<p>title: $title$</p>',
       '<p>long name: $person.fullname$</p>'
     ].join('');
 
-    var d1 = {
+    var d = {
       title: 'value test',
       person: {
-        fullname: 'my very long name'
+        fullname: 'my longer name'
       }
     };
 
-    var t1 = s1.template(d1);
+    var t = s.template(d);
 
-    var expected = '<p>title: value test</p><p>long name: my very long name</p>';
+    var expected = '<p>title: value test</p><p>long name: my longer name</p>';
 
-    console.log(t1 === expected); // => true
+    console.log(t === expected); // => true
     
 ## simple array
 
     var s2 = [
       '<ul>',
-        '$[#]$',
-        '<li>$[#]$</li>',
-        '$/[#]$',
+        '$#.$',
+        '<li>$.$</li>',
+        '$/.$',
       '</ul>'
     ].join('');
 
@@ -124,9 +128,9 @@ methods to native/built-in types:
 
     var list = [
       '<ul>', 
-      '$addresses$', 
-      '<li>$[#].street$</li>', 
-      '<li>$[#].city$, $[#].state$</li>', 
+      '$#addresses$', 
+      '<li>$.street$</li>', 
+      '<li>$.city$, $.state$</li>', 
       '$/addresses$', 
       '</ul>'
     ].join('\n');
@@ -158,15 +162,15 @@ methods to native/built-in types:
   
 ## combining template results
 
-  [ todo ]
+  [ TODO ]
   
 ## more interesting examples
 
-[ todo function#template ]
+  [ TODO function#template ]
 
-[ todo css generator ]
+  [ TODO css generator ]
 
-[ todo javascript generator ]
+  [ TODO html generator ]
 
 # License
 

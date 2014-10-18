@@ -1,7 +1,5 @@
 // mocha/suite.js
 
-console.log('suite');
-
 var assert = assert;
 
 if (typeof require == 'function') {
@@ -58,7 +56,7 @@ test('replaces tokens without re-formatting or trimming', function () {
 
   var s = ' $space$ ';
 
-  assert(s.template({ space: '[space]'}) === ' [space] ');
+  assert(s.template({ space: 'trimmed'}) === ' trimmed ');
 });
 
 test('does not escape/unescape html/xml tags', function () {
@@ -73,13 +71,6 @@ test('ignores un-matched $placeholder$ data', function () {
   var s = '<p>$value$</p>';
   
   assert(s.template({ wrongName: 'placeholder' }) === s);
-});
-
-test('ignores empty data', function () {
-
-  var s = '<p>$value$</p>';
-  
-  assert(s.template({ value: '' }) === s);
 });
 
 test('"$" chars inside $placeholder$ data are preserved', function () {
@@ -100,7 +91,7 @@ test('replaces $dot.value$ data', function () {
   }) === '<p>placeholder</p>');
 });
 
-test('replaces multiple $dot.value$ references', function () {
+test('replaces multiple $dot.value$ data', function () {
 
   var s = '<p>$dot.value$</p><p>$dot.name$</p>' +
           '<p>$dot.value$</p><p>$dot.name$</p>';
@@ -116,12 +107,27 @@ test('replaces multiple $dot.value$ references', function () {
 
 suite('blocks');
 
-test('handle path to object hash values', function () {
+test('hash key regex', function () {
 
   var s = [
-    '$#object.inner$',
+    '$name#$',
+    ' + $.value$',
+    '$/name#$'
+  ].join('\n');
+
+  var tokens = s.match(/\$[^\$^\s]+\#\$/g);
+
+  assert(tokens.toString() === "$name#$,$/name#$");
+});
+
+test('handle object hash values', function () {
+
+  var s = [
+    '$object#$',
+      '$inner#$',
       ' + $.$',
-    '$/object.inner$'
+      '$/inner#$',
+    '$/object#$'
   ].join('\n');
 
   var data = {
@@ -141,54 +147,20 @@ test('handle path to object hash values', function () {
     ""
   ].join('\n'); 
 
-  var actual = s.template(data);
-  // console.warn( actual );
-  // console.log( expected );
-  assert(actual === expected);
-});
-
-test('handle nested object hash values', function () {
-
-  var s = [
-    '$#object$',
-      '$#inner$',
-      ' + $.$',
-      '$/inner$',
-    '$/object$'
-  ].join('\n');
-
-  var data = {
-    object: {
-      inner: {
-        name: 'match name',
-        value: 'match value'
-      }
-    }
-  };
+  // console.warn( s.template(data) );
   
-  var expected = [
-    "",
-    " + match name",
-    "",
-    " + match value",
-    ""
-  ].join('\n'); 
-
-  var actual = s.template(data);
-  // console.warn( actual );
-  // console.log( expected );
-  assert(actual === expected);
+  assert(s.template(data) === expected);
 });
 
-test('handle nested object hash keys', function () {
+test('handle object hash keys', function () {
 
   var s = [
-    '$#object$',
-      '$#inner$',
+    '$object#$',
+      '$inner#$',
       ' + $.name$',
       ' + $.value$',
-      '$/inner$',
-    '$/object$'
+      '$/inner#$',
+    '$/object#$'
   ].join('\n');
 
   var data = {
@@ -207,18 +179,31 @@ test('handle nested object hash keys', function () {
     ""
   ].join('\n'); 
 
-  var actual = s.template(data);
-  // console.warn( actual );
-  // console.warn( expected );
-  assert(actual === expected);
+  // console.log( s.template(data) );
+  
+  assert(s.template(data) === expected);
+});
+
+
+test('hash regex', function () {
+
+  var s = [
+    '$names#$',
+    ' + $.$',
+    '$/names#$'
+  ].join('\n');
+
+  var tokens = s.match(/\$[^\$^\s]+\#\$/g);
+
+  assert(tokens.toString() === "$names#$,$/names#$");
 });
 
 test('handle array hash values', function () {
 
   var s = [
-    '$#names$',
+    '$names#$',
     ' + $.$',
-    '$/names$'
+    '$/names#$'
   ].join('\n');
   
   var data = {
@@ -233,15 +218,15 @@ test('handle array hash values', function () {
     "",    
     " + ho-tay",
     ""
-  ].join('\n');
+  ].join('\n'); 
+
+  // console.warn( s.template(data) );
+  // console.warn( expected );
   
-  var actual = s.template(data);
-  // console.warn( actual );
-  // console.log( expected );
-  assert(actual === expected);
+  assert(s.template(data) === expected);
 });
 
-test('hash path regex', function () {
+test('hash-key regex', function () {
 
   var s = [
     '$names#$',
@@ -258,10 +243,10 @@ test('hash path regex', function () {
 test('handle array hash key values', function () {
 
   var s = [
-    '$#names$',
+    '$names#$',
     ' + $.first$',
     ' + $.last$',    
-    '$/names$'
+    '$/names#$'
   ].join('\n');
   
   var data = {
@@ -285,11 +270,13 @@ test('handle array hash key values', function () {
     ""
   ].join('\n'); 
 
-  var actual = s.template(data);
-  // console.warn( actual );
-  // console.log( expected );
-  assert(actual === expected);
+  // console.warn( s.template(data) );
+  // console.warn( expected );
+  
+  assert(s.template(data) === expected);
 });
+
+
 
 
 /*** function#template ***/
@@ -397,7 +384,7 @@ suite('complex blocks');
 test('replaces $object$ $.$ $/object$ data', function () {
 
   function s(){
-    /***$#object$ <p>$.$</p> $/object$***/
+    /***$object#$ <p>$.$</p> $/object#$***/
   }
   
   var data = { 
@@ -409,10 +396,10 @@ test('replaces $object$ $.$ $/object$ data', function () {
   
   var expected = ' <p>value</p>  <p>name</p> ';
   
-  var actual = s.template(data);
-  // console.warn( actual );
-  // console.log( expected );
-  assert(actual === expected);
+  // console.warn(s.template(data));
+  // console.warn(expected);
+
+  assert(s.template(data) === expected);
 });
 
 test('deeply nested arrays', function () {
@@ -422,15 +409,15 @@ test('deeply nested arrays', function () {
     '<ul>',
       '<li>',
       
-        '$#three$',
+        '$three#$',
           '<ul>',
             '<li>',
             
-              '$#.$',
+              '$.#$',
                 '<ul>',
                   '<li>',
 
-                      '$#.$',
+                      '$.#$',
                         '<ul>',
                           '<li>',
 
@@ -438,15 +425,15 @@ test('deeply nested arrays', function () {
 
                             '</li>',
                         '</ul>',
-                      '$/.$',
+                      '$/.#$',
                       
                     '</li>',
                 '</ul>',
-              '$/.$',
+              '$/.#$',
               
             '</li>',
           '</ul>',
-        '$/three$',
+        '$/three#$',
         
       '</li>',
     '</ul>'
@@ -492,76 +479,76 @@ test('deeply nested arrays', function () {
     '</li>', '</ul>'
   ].join('\n');
   
-  var actual = s.template(data);
-  // console.warn( actual ); // split('\n')
-  // console.log( expected ); // split('\n')
-  assert(actual === expected);
+  // console.warn( s.template(data).split('\n') );
+  // console.warn( expected.split('\n') );
+
+  assert(s.template(data) ===  expected);
 });
 
-test('deeply nested arrays in objects', function () {
+test('arrays can be deeply nested in objects', function () {
 
   var s4 = [
     
     "<p>$title$</p>",
     "<ul>",
-    "$#one$",
+    "$one#$",
       "<li>",
         "<p>$title$</p>", // is this a valid case???
         "<ul>",
-        "$#.one$",
+        "$.one#$",
           "<li>",
             "$.inner$",
           "</li>",
-        "$/.one$",
+        "$/.one#$",
         "</ul>",
       "</li>",
-    "$/one$",
+    "$/one#$",
     "</ul>",
     "<p>$one.innerTitle$</p>", // is this a valid case???
     "<ul>",
-    "$#one$",
+    "$one#$",
       "<li>",
         "<ul>",
-        "$#.two$",
+        "$.two#$",
           "<li>",
             "<ul>",
-            "$#.three$",
+            "$.three#$",
               "<li>",
                 "<ul>",
-                "$#.four$",
+                "$.four#$",
                   "<li>",
                     "$.inner$",
                   "</li>",
-                "$/.four$",
+                "$/.four#$",
                 "</ul>",
               "</li>",
-            "$/.three$",
+            "$/.three#$",
             "</ul>",
           "</li>",
-        "$/.two$",
+        "$/.two#$",
         "</ul>",
       "</li>",
-    "$/one$",
+    "$/one#$",
     "</ul>",
     "<ul>",
-    "$#one$",
+    "$one#$",
       "<li>",
         "<p>$one.arrayTitle$</p>", // is this a valid case???
         "<ul>",
-        "$#.three$",
+        "$.three#$",
           "<li>",  
             "<ul>",
-            "$#.$",
+            "$.#$",
               "<li>",
                 "$.$",
               "</li>",
-            "$/.$",
+            "$/.#$",
             "</ul>",
           "</li>",            
-        "$/.three$",
+        "$/.three#$",
         "</ul>",
       "</li>",
-    "$/one$",
+    "$/one#$",
     "</ul>"
   ].join('');
 
@@ -626,20 +613,18 @@ test('deeply nested arrays in objects', function () {
     "</li></ul>"
   ].join('');
 
-  var actual = s4.template(d4);
-  
-  // console.warn( actual );
+  // console.warn( s4.template(d4) );
   // console.warn( expected );
 
-  assert(actual === expected);
+  assert(s4.template(d4) === expected);
 });
 
 test('replaces indexed array data', function () {
   
   var s = [
-    '$#.$', 
+    '$.#$', 
     '<li>$.$</li>', 
-    '$/.$'
+    '$/.#$'
   ].join('\n');
   
   var data = [ 33, false ];
@@ -652,34 +637,33 @@ test('replaces indexed array data', function () {
     ''
   ].join('\n');
   
-  var actual = s.template(data);
-  // console.warn( actual );
-  // console.warn( expected );
-  assert(actual === expected);
+  // console.log( s.template(data) );
+  
+  assert(s.template(data) === expected);
 });
 
-test('replaces duplicated nested arrays of arrays', function () {
+test('replaces deeply nested arrays of arrays', function () {
   
   var s = [
   'FIRST:',
   
-    '$#.$',
-      '$#.$',    
-//        '$#.$',    
+    '$.#$',
+      '$.#$',    
+//        '$.#$',    
           '<p>$.$</p>',
-//        '$/.$',
-      '$/.$',    
-    '$/.$',
+//        '$/.#$',
+      '$/.#$',    
+    '$/.#$',
     
   'SECOND:',
 
-    '$#.$',
-      '$#.$',    
-//        '$#.$',    
+    '$.#$',
+      '$.#$',    
+//        '$.#$',    
           '<p>$.$</p>',
-//        '$/.$',
-      '$/.$',    
-    '$/.$'
+//        '$/.#$',
+      '$/.#$',    
+    '$/.#$'
   ].join('\n');
   
   var data = [ [ [ 1, 2 ], [ 3, 4, 5] ], [ [ 6, 7], [ 8, 9] ] ];
@@ -715,18 +699,18 @@ test('replaces duplicated nested arrays of arrays', function () {
     ""
   ].join('\n');
 
-  var actual = s.template(data);
-  // console.warn( actual ); // split('\n')
-  // console.log( expected ); // split('\n')
-  assert(actual === expected);
+  // console.warn( s.template(data).split('\n') );
+  // console.warn( expected.split('\n') );
+
+  assert(s.template(data) === expected);
 });
 
 test('replaces indexed object key-value data', function () {
   
   var s = [
-    '$#.$',
+    '$.#$',
     '<li>$.name$</li>',
-    '$/.$'
+    '$/.#$'
   ].join('\n');
 
   var data = [
@@ -745,13 +729,13 @@ test('replaces indexed object key-value data', function () {
   assert(s.template(data) === expected);
 });
 
-test('replaces array index values using $#array$ $.$ and $/array$', function () {
+test('replaces array index values using $array#$ $.$ and $/array#$', function () {
 
   var s = [
     '<ul>', 
-    '$#array$', 
+    '$array#$', 
     '<li>$.$</li>', 
-    '$/array$', 
+    '$/array#$', 
     '</ul>'
   ].join('\n');
   
@@ -768,13 +752,13 @@ test('replaces array index values using $#array$ $.$ and $/array$', function () 
   ].join('\n'));
 });
 
-test('replaces array item values using $#array$ $.item$ and $/array$', function () {
+test('replaces array item values using $array#$ $.item$ and $/array#$', function () {
 
   var s = [
     '<ul>', 
-    '$#array$', 
+    '$array#$', 
     '<li>$.item$</li>', 
-    '$/array$', 
+    '$/array#$', 
     '</ul>'
   ].join('\n');
   
@@ -799,9 +783,9 @@ test('replaces array item values using $#array$ $.item$ and $/array$', function 
 test('prints array item values sequentially if not hashed', function () {
 
   var s = [
-    '$#array$', 
+    '$array#$', 
       ' + $.nested$', 
-    '$/array$'
+    '$/array#$'
   ].join('');
   
   var data = { 
@@ -812,31 +796,31 @@ test('prints array item values sequentially if not hashed', function () {
   
   var expected = ' + 2,4,6,8';
 
-  var actual = s.template(data);
-  // console.warn( actual ); // split()
-  // console.log( expected ); // split()
-  assert(actual === expected);
+  // console.log(  s.template(data).split() );
+  // console.log(  expected.split() );
+
+  assert(s.template(data) === expected);
 });
 
 test('groups multi-row key-value data by array index', function () {
 
-  var s = [
+  var list = [
     '<ul>', 
-    '$#addresses$', 
+    '$addresses#$', 
     '<li>$.street$</li>', 
     '<li>$.city$, $.state$</li>', 
-    '$/addresses$', 
+    '$/addresses#$', 
     '</ul>'
   ].join('\n');
 
-  var data = { 
+  var t = list.template({ 
     addresses: [
       { street: '123 fourth street', city: 'cityburgh', state: 'aa' },
       { street: '567 eighth street', city: 'burgville', state: 'bb' },
       { street: '910 twelfth street', city: 'villetown', state: 'cc' }
     ]
-  };
-    
+  });
+  
   var expected = [
     '<ul>',
     '',
@@ -852,11 +836,7 @@ test('groups multi-row key-value data by array index', function () {
     '</ul>'
   ].join('\n');
 
-  var actual = s.template(data);
-  // console.warn( actual ); // split('\n')
-  // console.log( expected ); // split('\n')
-  assert(actual === expected);
-  
+  assert(t === expected);
 });
 
 test('replace deeply nested arrays on object keys', function () {
@@ -864,11 +844,11 @@ test('replace deeply nested arrays on object keys', function () {
 function f() {
 /***
 <ul>
-$#array$
-$#.nested$
+$array#$
+$.nested#$
 <li>$.name$</li>
-$/.nested$
-$/array$
+$/.nested#$
+$/array#$
 </ul>
 ***/}
   
@@ -902,18 +882,18 @@ $/array$
     '',
   ].join('\n');
   
-  var actual = f.template(data);
-  // console.warn( actual ); // split('\n')
-  // console.log( expected ); // split('\n')
-  assert(actual === expected);
+  // console.log(expected.split('\n'));
+  // console.log(f.template(data).split('\n'));
+
+  assert(f.template(data) === expected);
 });
 
 
 suite('bad arrays');
 
-test('$#array$...$/array$ not replaced when missing $.$ tokens', function () {
+test('$array#$...$/array#$ not replaced when missing $.$ tokens', function () {
   
-  var s = ['$#array$', '<li>$item$</li>', '$/array$'].join('');
+  var s = ['$array$', '<li>$item$</li>', '$/array$'].join('');
   
   var data = { 
     array: [
@@ -922,19 +902,19 @@ test('$#array$...$/array$ not replaced when missing $.$ tokens', function () {
     ]
   };
   
-  var expected = ['$#array$', '<li>$item$</li>', '$/array$'].join('');
+  var expected = ['$array$', '<li>$item$</li>', '$/array$'].join('');
   
-  var actual = s.template(data);
-  // console.warn( actual ); // split('\n')
-  // console.log( expected ); // split('\n')
-  assert(actual === expected);
+  // console.warn(s.template(data));
+  // console.log(expected);
+  
+  //assert(s.template(data) === expected);
 });
 
-test('$#array$ $.item$ not replaced when missing $/array$ token', function () {
+test('$array#$ $.item$ not replaced when missing $/array#$ token', function () {
      
   var s = [
     '<ul>', 
-    '$#missingEndTag$', 
+    '$missingEndTag#$', 
     '<li>$.item$</li>', 
     '</ul>'
   ].join('\n');
@@ -948,15 +928,14 @@ test('$#array$ $.item$ not replaced when missing $/array$ token', function () {
   
   var expected = [
     '<ul>', 
-    '$#missingEndTag$', 
+    '$missingEndTag#$', 
     '<li>$.item$</li>',
     '</ul>'
   ].join('\n');
 
-  var actual = s.template(data);
-  // console.warn( actual ); // split('\n')
-  // console.log( expected ); // split('\n')
-  assert(actual === expected);
+  // console.warn(s.template(data));
+  // console.log(expected);  
+  assert(s.template(data) === expected);
 });
 
 
@@ -965,21 +944,21 @@ suite('mixed data examples');
 test('processes mixed data map', function () {
 
 // left-aligned to avoid all the whitespace comparisons...
-function f() {
+function temp() {
 /***
 <p>$title$</p>
 <p>$object.main.property$ for $object.main.name$</p>
 <ul>
-$#items$
+$items#$
 <li>$.name$, $.age$</li>
 <li>$.address$</li>
-$/items$
+$/items#$
 </ul>
 <p>$title2$</p>
 <ul>
-$#list$
+$list#$
 <li>$.$</li>
-$/list$
+$/list#$
 </ul>
 ***/
 }
@@ -1036,35 +1015,35 @@ $/list$
     ''
   ].join('\n');
 
-  var actual = f.template(data);
-  // console.warn( actual ); // split('\n')
-  // console.log( expected ); // split('\n')
-  assert(actual === expected);
+  // console.warn( temp.template(data).split('\n') );
+  // console.warn( expected.split('\n') );
+
+  assert(temp.template(data) === expected);
 });
 
 test('template results can be combined via data argument', function () {
 
-  var s = [
+  var list = [
     '<ul>', 
     '$addresses$', // this is a string.template result
     '</ul>'
   ].join('\n');
               
   var address = [
-    '$#.$', 
+    '$.#$', 
     '<li>$.street$</li>', 
     '<li>$.city$, $.state$</li>', 
-    '$/.$'
+    '$/.#$'
   ].join('\n');
   
-  var data = {
+  var t = list.template({
     addresses: address.template([
       { street: '123 fourth street', city: 'cityburgh', state: 'aa' },
       { street: '567 eighth street', city: 'burgville', state: 'bb' },
       { street: '910 twelfth street', city: 'villetown', state: 'cc' }
     ])
-  };
-    
+  });
+  
   var expected = [
     '<ul>',
     '',
@@ -1080,13 +1059,23 @@ test('template results can be combined via data argument', function () {
     '</ul>'
   ].join('\n');
   
-  var actual = s.template(data);
-  // console.warn( actual ); // split('\n')
-  // console.log( expected ); // split('\n')
-  assert(actual === expected);
+  // console.log(t);
+  
+  assert(t === expected);
 });
 
 test('css template example', function () {
+
+  // css
+  
+  var selector = '$selector$';
+  var ruleset = '{ $ruleset$ }';
+  var rule = '$prop$: $value$;';
+
+  var r = rule.template([ {prop: 'color', value: '#345'} ])
+  var rs = ruleset.template({ ruleset: r });
+  var s = selector.template({selector: 'a > b > c'}).template(rs);
+  //console.log(s == 'a > b > c{ color: #345; }');
 
   // heredoc css
 

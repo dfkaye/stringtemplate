@@ -11,7 +11,6 @@ var mocha = new Mocha({ui:"qunit", reporter:"spec"});
 
 //Add your test files
 mocha.addFile("./test/mocha/suite.js");
-//mocha.addFile("./test/mocha/refactor-suite.js");
 
 //Run your tests
 mocha.run(function(failures){
