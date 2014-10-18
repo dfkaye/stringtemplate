@@ -8,8 +8,12 @@ stringtemplate
 
 You may view a presentation about this project on rawgit at 
 <a href='https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html'
-  target='_blank'>https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html</a>
+  target='_blank'>https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html</a>.
 
+You may read a very short version of this document at 
+<a href='https://gist.github.com/dfkaye/9bf102b56063fd9628fb'
+  target='_blank'>https://gist.github.com/dfkaye/9bf102b56063fd9628fb</a>.
+  
 ## Minimalist Logic-less Templates in JavaScript
 
 `stringtemplate` adds a `template()` method to `String.prototype` and 
@@ -38,6 +42,7 @@ Read Parr's full argument in his paper on
 Parr has implemented this strict separation in his own 
 [StringTemplate](http://www.stringtemplate.org/) project for java (with ports 
 for C#, Python).
+
 
 # stringtemplate ~ the JavaScript version
 
