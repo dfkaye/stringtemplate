@@ -17,7 +17,7 @@ test('is method', function () {
   assert(typeof ''.template == 'function');
 });
 
-test('returns self.toString() when argument is not an object', function () {
+test('returns unmodified when argument is not an object', function () {
 
   var s = '';
   
@@ -26,7 +26,7 @@ test('returns self.toString() when argument is not an object', function () {
   assert(s.template(true) === s);
 });
 
-test('returns self.toString() when data is empty object or array', function () {
+test('returns unmodified when data is empty object or array', function () {
 
   var s = '';
   
@@ -47,7 +47,7 @@ test('inline value regex', function () {
   assert(tokens.toString() === "$placeholder$");
 });
 
-test('replaces matched $placeholder$ values', function () {
+test('replaces $placeholder$ token with corresponding value', function () {
 
   var s = '<p>$placeholder$</p>';
   
@@ -68,14 +68,14 @@ test('does not escape/unescape html/xml tags', function () {
   assert(s.template({ value: 'placeholder' }) === '<p>placeholder</p>');
 });
 
-test('ignores un-matched $placeholder$ data', function () {
+test('does not replace un-matched $placeholder$ data', function () {
 
   var s = '<p>$value$</p>';
   
   assert(s.template({ wrongName: 'placeholder' }) === s);
 });
 
-test('ignores empty data', function () {
+test('does not replace tokens with empty data', function () {
 
   var s = '<p>$value$</p>';
   
@@ -244,15 +244,16 @@ test('handle array hash values', function () {
 test('hash path regex', function () {
 
   var s = [
-    '$names#$',
-    ' + $.first$',
-    ' + $.last$',    
-    '$/names#$'
+    '$#object$',
+      '$#inner$',
+      ' + $.name$',
+      '$/inner$',
+    '$/object$'
   ].join('\n');
 
-  var tokens = s.match(/\$[^\$^\s]+\$/g);
+  var tokens = s.match(/\$\#[^\$^\s]+\$/g);
 
-  assert(tokens.toString() === "$names#$,$.first$,$.last$,$/names#$");
+  assert(tokens.toString() === "$#object$,$#inner$");
 });
 
 test('handle array hash key values', function () {
@@ -292,113 +293,16 @@ test('handle array hash key values', function () {
 });
 
 
-/*** function#template ***/
-
-suite('function#template for heredoc support');
-
-test('is method', function () {
-  assert(typeof (function(){}).template == 'function');
-});
-
-test('returns empty string when function has no /*** and ***/ delimiters', function () {
-  
-  function temp() {}
-  
-  assert(temp.template() === '');
-});
-
-test('returns docstring between /*** and ***/ delimiters', function () {
-
-  function temp() {
-  /***Hello. I am a docstring, inside a function.***/
-  }
-  
-  assert(temp.template() === 'Hello. I am a docstring, inside a function.');
-});
-
-test('preserves whitespace in /*** docstring ***/', function () {
-
-  function temp() {
-  /***
-  Hello.
-    
-    I am a docstring,
-    
-    with indentation and blank lines.
-  ***/
-  }
-  var expected = [
-  '',
-    '  Hello.',
-    '    ',
-    '    I am a docstring,',
-    '    ',
-    '    with indentation and blank lines.',
-    '  ',
-  ].join('\n');
- 
-  assert(temp.template() === expected);
-});
-
-test('removes line comments found within /*** docstring ***/', function () {
-
-  function temp() {
-  /***
-  Hello.  // I am a comment
-    I am a docstring,
-    inside a function.  
-  ***/
-  }
-  // 
-  assert(-1 === temp.template().indexOf('I am a comment'));
-});
-
-test('calls docstring#template when data argument is specified', function () {
-
-  function temp() {
-  /***
-  <p>$title$</p>
-  ***/
-  }
-  
-  var data = { title: 'data test' };
-  
-  var expected = [
-  '',
-  '  <p>data test</p>',
-  '  '
-  ].join('\n');
-  
-  // console.warn( temp.template(data).split('\n') );
-  // console.warn( expected.split('\n') );
-  
-  assert(temp.template(data) === expected);
-});
-
-test('returns unprocessed docstring when data is not an object', function () {
-  
-  function temp() {
-  /***
-  <p>$title$</p>
-  ***/
-  }
-  
-  var expected = ['', '  <p>$title$</p>', '  '].join('\n');
-  
-  // console.warn( temp.template('data test').split('\n') );
-  // console.warn( expected.split('\n') );
-
-  assert(temp.template('data test') === expected);
-});
-
 
 suite('complex blocks');
 
 test('replaces $object$ $.$ $/object$ data', function () {
 
-  function s(){
-    /***$#object$ <p>$.$</p> $/object$***/
-  }
+  var s = [
+    '$#object$',
+    ' <p>$.$</p> ',
+    '$/object$'
+  ].join('');
   
   var data = { 
     object: {
@@ -662,27 +566,29 @@ test('replaces duplicated nested arrays of arrays', function () {
   
   var s = [
   'FIRST:',
-  
     '$#.$',
       '$#.$',    
-//        '$#.$',    
-          '<p>$.$</p>',
-//        '$/.$',
+        '<p>$.$</p>',
       '$/.$',    
     '$/.$',
-    
   'SECOND:',
-
     '$#.$',
       '$#.$',    
-//        '$#.$',    
-          '<p>$.$</p>',
-//        '$/.$',
+        '<p>$.$</p>',
       '$/.$',    
     '$/.$'
   ].join('\n');
   
-  var data = [ [ [ 1, 2 ], [ 3, 4, 5] ], [ [ 6, 7], [ 8, 9] ] ];
+  var data = [ 
+    [ 
+      [ 1, 2 ], 
+      [ 3, 4, 5] 
+    ], 
+    [ 
+      [ 6, 7], 
+      [ 8, 9]
+    ]
+  ];
 
   var expected = [
     "FIRST:",
@@ -768,7 +674,7 @@ test('replaces array index values using $#array$ $.$ and $/array$', function () 
   ].join('\n'));
 });
 
-test('replaces array item values using $#array$ $.item$ and $/array$', function () {
+test('replaces hashed array item values using $#array$ $.item$ and $/array$', function () {
 
   var s = [
     '<ul>', 
@@ -861,16 +767,15 @@ test('groups multi-row key-value data by array index', function () {
 
 test('replace deeply nested arrays on object keys', function () {
 
-function f() {
-/***
-<ul>
-$#array$
-$#.nested$
-<li>$.name$</li>
-$/.nested$
-$/array$
-</ul>
-***/}
+  var s = [
+    '<ul>',
+    '$#array$',
+    '$#.nested$',
+    '<li>$.name$</li>',
+    '$/.nested$',
+    '$/array$',
+    '</ul>',
+  ].join('\n');
   
   var data = { 
     array: [
@@ -885,7 +790,6 @@ $/array$
   };
   
   var expected = [
-    '',
     '<ul>',
     '',
     '',
@@ -898,20 +802,19 @@ $/array$
     '<li>john</li>',
     '',
     '',
-    '</ul>',
-    '',
+    '</ul>'
   ].join('\n');
   
-  var actual = f.template(data);
-  // console.warn( actual ); // split('\n')
-  // console.log( expected ); // split('\n')
+  var actual = s.template(data);
+  // console.warn( actual )//.split('\n') )
+  // console.log( expected )//.split('\n') )
   assert(actual === expected);
 });
 
 
 suite('bad arrays');
 
-test('$#array$...$/array$ not replaced when missing $.$ tokens', function () {
+test('does not replace collection members when missing $.$ token', function () {
   
   var s = ['$#array$', '<li>$item$</li>', '$/array$'].join('');
   
@@ -930,7 +833,7 @@ test('$#array$...$/array$ not replaced when missing $.$ tokens', function () {
   assert(actual === expected);
 });
 
-test('$#array$ $.item$ not replaced when missing $/array$ token', function () {
+test('does not replace collection when missing end ($/..$) token', function () {
      
   var s = [
     '<ul>', 
@@ -960,9 +863,111 @@ test('$#array$ $.item$ not replaced when missing $/array$ token', function () {
 });
 
 
+/*** function#template ***/
+
+suite('function#template for heredoc support');
+
+test('is method', function () {
+  assert(typeof (function(){}).template == 'function');
+});
+
+test('returns empty string when function has no /*** and ***/ delimiters', function () {
+  
+  function temp() {}
+  
+  assert(temp.template() === '');
+});
+
+test('returns docstring between /*** and ***/ delimiters', function () {
+
+  function temp() {
+  /***Hello. I am a docstring, inside a function.***/
+  }
+  
+  assert(temp.template() === 'Hello. I am a docstring, inside a function.');
+});
+
+test('preserves whitespace in /*** docstring ***/', function () {
+
+  function temp() {
+  /***
+  Hello.
+    
+    I am a docstring,
+    
+    with indentation and blank lines.
+  ***/
+  }
+  var expected = [
+  '',
+    '  Hello.',
+    '    ',
+    '    I am a docstring,',
+    '    ',
+    '    with indentation and blank lines.',
+    '  ',
+  ].join('\n');
+ 
+  assert(temp.template() === expected);
+});
+
+test('removes line comments found within /*** docstring ***/', function () {
+
+  function temp() {
+  /***
+  Hello.  // I am a comment
+    I am a docstring,
+    inside a function.  
+  ***/
+  }
+  // 
+  assert(-1 === temp.template().indexOf('I am a comment'));
+});
+
+test('calls docstring#template when data argument is specified', function () {
+
+  function temp() {
+  /***
+  <p>$title$</p>
+  ***/
+  }
+  
+  var data = { title: 'data test' };
+  
+  var expected = [
+  '',
+  '  <p>data test</p>',
+  '  '
+  ].join('\n');
+  
+  // console.warn( temp.template(data).split('\n') );
+  // console.warn( expected.split('\n') );
+  
+  assert(temp.template(data) === expected);
+});
+
+test('returns unprocessed docstring when data is not an object', function () {
+  
+  function temp() {
+  /***
+  <p>$title$</p>
+  ***/
+  }
+  
+  var expected = ['', '  <p>$title$</p>', '  '].join('\n');
+  
+  // console.warn( temp.template('data test').split('\n') );
+  // console.warn( expected.split('\n') );
+
+  assert(temp.template('data test') === expected);
+});
+
+
+/*** mixed data examples ***/
+
 suite('mixed data examples');
 
-test('processes mixed data map', function () {
+test('mixed data map', function () {
 
 // left-aligned to avoid all the whitespace comparisons...
 function f() {
@@ -1042,9 +1047,9 @@ $/list$
   assert(actual === expected);
 });
 
-test('template results can be combined via data argument', function () {
+test('combining template output', function () {
 
-  var s = [
+  var list = [
     '<ul>', 
     '$addresses$', // this is a string.template result
     '</ul>'
@@ -1080,7 +1085,7 @@ test('template results can be combined via data argument', function () {
     '</ul>'
   ].join('\n');
   
-  var actual = s.template(data);
+  var actual = list.template(data);
   // console.warn( actual ); // split('\n')
   // console.log( expected ); // split('\n')
   assert(actual === expected);
@@ -1125,7 +1130,21 @@ test('css template example', function () {
     }
   ***/
   }).template();
- // console.warn(css.split('\n'));
- // console.warn(expected.split('\n'));
+  // console.warn(css)//.split('\n'));
+  // console.log(expected)//.split('\n'));
   assert(css === expected);
+});
+
+test('conditioned template data', function () {
+
+  var rule = 'width: $width$';
+  var maxWidth = 600;
+  var pixel = 'px';
+  
+  function condition(width, unit) {
+    return (width >= maxWidth ? maxWidth : width) + (unit || pixel);
+  } 
+   
+  assert(rule.template({ width: condition(300, 'em') }) === 'width: 300em');
+  assert(rule.template({ width: condition(800) }) === 'width: 600px');
 });

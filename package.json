@@ -1,6 +1,6 @@
 {
   "name": "stringtemplate",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Minimalist Logic-less Templates in JavaScript",
   "main": "stringtemplate.js",
   "devDependencies": {

@@ -6,7 +6,7 @@ stringtemplate
 
 [ NOT STABLE ~ TOKEN SET STILL IN REVIEW ~ DOCS ARE INACCURATE ~ 18 OCT 2014 ]
 
-You may view a presentation about this project on rawgit at 
+You may view a slightly dated presentation about this project on rawgit at 
 <a href='https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html'
   target='_blank'>https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html</a>.
 
@@ -83,9 +83,12 @@ methods to native/built-in types:
   - returns empty string if no delimiters found
   - returns docstring.template(data) if `data` argument specified, 
   - otherwise returns the docstring unmodified.   
-  - __TODO__ (add note on how to configure uglify to allow comment delimiters while 
-      removing others)
-  - <del>removes line comments found within delimiters `// so you can annotate lines` </del>
+  - removes line comments found within delimiters `// so you can annotate lines`
+  - to deal with minifiers that remove block comments from source files, you can 
+    use this [workaround for UglifyJS2]
+    (http://dfkaye.github.io/2014/03/24/preserve-multiline-strings-with-uglify/) 
+    to preserve the three-asterisk 
+    delimiters
 
 # Examples
 
@@ -183,8 +186,8 @@ methods to native/built-in types:
 
 # Tests
 
-Tests are currently run with `mocha` using the `assert`, the `qunit` ui and the 
-`spec` reporter.
+Tests are currently run with `mocha` using the `assert` module, the `qunit` ui 
+and the `spec` reporter.
 
 ## node
 
