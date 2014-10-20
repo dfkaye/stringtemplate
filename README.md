@@ -1,10 +1,10 @@
 stringtemplate
 ==============
 
-[ v0.0.10 ] [![Build Status](https://travis-ci.org/dfkaye/stringtemplate.png?branch=master)]
+[![Build Status](https://travis-ci.org/dfkaye/stringtemplate.png?branch=master)]
 (https://travis-ci.org/dfkaye/stringtemplate)
 
-[ NOT STABLE ~ TOKEN SET STILL IN REVIEW ~ DOCS ARE INACCURATE ~ 18 OCT 2014 ]
+[ v0.0.11 ~ NOT STABLE ~ TOKEN SET and DOCS under review ~ 18 OCT 2014 ]
 
 You may view a slightly dated presentation about this project on rawgit at 
 <a href='https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html'
