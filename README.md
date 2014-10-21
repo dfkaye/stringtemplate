@@ -4,17 +4,33 @@ stringtemplate
 [![Build Status](https://travis-ci.org/dfkaye/stringtemplate.png?branch=master)]
 (https://travis-ci.org/dfkaye/stringtemplate)
 
-[ v0.0.11 ~ NOT STABLE ~ TOKEN SET and DOCS under review ~ 18 OCT 2014 ]
+[ v0.0.11 ~ NOT STABLE ~ TOKEN SET and DOCS under revision ~ 21 OCT 2014 ]
 
 You may view a slightly dated presentation about this project on rawgit at 
 <a href='https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html'
   target='_blank'>https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html</a>.
 
-You may read a very short version of this document at 
+You may read an ongoing update of the goals, pros, cons, and other details at 
 <a href='https://gist.github.com/dfkaye/9bf102b56063fd9628fb'
   target='_blank'>https://gist.github.com/dfkaye/9bf102b56063fd9628fb</a>.
   
 ## Minimalist Logic-less Templates in JavaScript
+
+`stringtemplate` is a strict separation or "logic-less" template module, that 
+performs one function: the merge() operation between a document string with 
+"holes" and data for filling this out. 
+
+`stringtemplate` takes an "eval-less" approach, unlike most other template 
+libraries, due to the arrival of 
+[Content Security Policy]
+(http://matthewrobertson.org/blog/2012/07/10/javascript-templates-and-chromes-content-security-policy/), 
+a very serious restriction coming to our "modern" browsers that financial, 
+medical, retailing and other security-sensitive entities will embrace 
+increasingly over time. 
+
+## API 
+
+[ under review 21 OCT 2014 ]
 
 `stringtemplate` adds a `template()` method to `String.prototype` and 
 `Function.prototype` that act as a batch string#replace, using `$token$` 
@@ -22,8 +38,18 @@ placeholders for values/objects and `$#objectOrArray$` and `$/objectOrArray$`
 tokens to demarcate iterable data with `$.$` for array indexes or `$.key$` 
 for key-value data. 
 
-[ TODO ~ EXPAND THIS DESCRIPTION ]
-
+  - $placeholder$ ~ use value found at data.placeholder
+  - $path.name$ ~ use value found at data.path.name
+  - $#path.name$ ~ marks the start of an iteration ~ must have a matching end 
+      token, $/path.name$
+  - $/path.name$ ~ marks the end of an iteration ~ must have a matching start
+      $#path.name$ token
+  - $.$ ~ inside an iteration, use object value at each index [0, 1, 2...]
+  - $.key$ ~ inside an iteration, use value found at [index].name
+  - $#.$ ~ start of a collection inside an iteration
+  - $/.$ ~ end of a collection inside an iteration
+  - $#.key$ ~ key-value collection inside an iteration  
+  - $/.key$ ~ end key-value collection inside an iteration
 
 # Logic-less Templates
 
