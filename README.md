@@ -10,14 +10,6 @@ You may view a slightly dated presentation about this project on rawgit at
 <a href='https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html'
   target='_blank'>https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html</a>.
 
-You may read an ongoing update of the goals, pros, cons, and other details at 
-<a href='https://gist.github.com/dfkaye/9bf102b56063fd9628fb'
-  target='_blank'>https://gist.github.com/dfkaye/9bf102b56063fd9628fb</a>.
-
-+ [background on strict separation](./doc/parr.md)
-+ [objections to strict separation](./doc/cons.md) <= TODO
-
-
 ## Minimalist Logic-less Templates in JavaScript
 
 `stringtemplate` is a strict separation or "logic-less" template module, that 
@@ -35,6 +27,10 @@ increasingly over time.
 quiet references, fallbacks for unexpected values, helpers, includes or 
 inheritance. The focus is on "simple" transformations
 
+For more on strict separation, see
+
++ [background](./doc/parr.md)
++ [objections](./doc/cons.md)
 
 ## API 
 
