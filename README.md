@@ -6,10 +6,6 @@ stringtemplate
 
 [ v0.0.11 ~ NOT STABLE ~ TOKENS &amp; DOCS UNDER REVIEW ~ 21 OCT 2014 ]
 
-You may view a slightly dated presentation about this project on rawgit at 
-<a href='https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html'
-  target='_blank'>https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html</a>.
-
 ## Minimalist Logic-less Templates in JavaScript
 
 `stringtemplate` is a strict separation or "logic-less" template module, that 
@@ -31,6 +27,10 @@ For more on strict separation, see
 
 + [background](./doc/parr.md)
 + [objections](./doc/cons.md)
+
+You may view a slightly dated presentation about this project on rawgit at 
+<a href='https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html'
+  target='_blank'>https://rawgit.com/dfkaye/stringtemplate/master/shower/index.html</a>.
 
 ## API 
 
@@ -120,7 +120,7 @@ to preserve the three-asterisk delimiters.
 
     console.log(t2 === expected); // => true
     
-## complex data 
+## complex data - objects in an array 
 
     var list = [
       '<ul>', 
